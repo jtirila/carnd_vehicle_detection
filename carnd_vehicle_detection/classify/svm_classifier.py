@@ -26,10 +26,10 @@ def get_classifier(classifier_path=None, classifier_save_path=DEFAULT_CLASSIFIER
            trained from scratch using the projec't default training set. 
     :param classifier_save_path: The path where the newly trained classifier is to be saved. Used only if no 
            classifier_path is set           
-    :param features_train: Training features as an numpy ndarray           
-    :param labels_train: Training labels as an numpy ndarray           
-    :param features_valid: Validation features as an numpy ndarray           
-    :param labels_valid: Validation labels as an numpy ndarray           
+    :param features_train: Training features as an numpy ndarray
+    :param labels_train: Training labels as an numpy ndarray
+    :param features_valid: Validation features as an numpy ndarray
+    :param labels_valid: Validation labels as an numpy ndarray
     :returns: A classifier object. 
     """
 
