@@ -1,22 +1,16 @@
+import numpy as np
 import cv2
 
 
-def bin_spatial(img, color_space='RGB', size=(32, 32)):
-    """FIXME: document, add entries to the list of allowed color spaces"""
-    if not color_space == 'RGB':
-        try:
-            assert color_space in ("HLS", "HSV", "LUV", "GRAY")
-        except AssertionError:
-            pass
+def bin_spatial(img, size=(32, 32)):
+    """Just resize an image and return the color values as a 1-dimensional vector
+    
+    :param img: the original image
+    :param size: A two-tuple containing the new size
+    :return: a 1-dim feature vector"""
 
-        colorspace_val = getattr(cv2, "COLOR_RGB2{}".format(color_space))
-        # Convert image to new color space (if specified)
-        # Use cv2.resize().ravel() to create the feature vector
-        img_cc = cv2.cvtColor(img, colorspace_val)
-    else:
-        img_cc = img
+    color1 = cv2.resize(img[:, :, 0], size).ravel()
+    color2 = cv2.resize(img[:, :, 1], size).ravel()
+    color3 = cv2.resize(img[:, :, 2], size).ravel()
+    return np.hstack((color1, color2, color3))
 
-    small_img = cv2.resize(img_cc, size)
-    features = small_img.ravel()  # Remove this line!
-    # Return the feature vector
-    return features

@@ -1,1 +1,1 @@
-from carnd_vehicle_detection.visualize.visualize import draw_boxes
+from carnd_vehicle_detection.visualize.visualize import draw_boxes, draw_labeled_bboxes, one_by_two_plot

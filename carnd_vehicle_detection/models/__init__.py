@@ -1,0 +1,1 @@
+from .detected_vehicle import DetectedVehicle

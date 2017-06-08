@@ -4,24 +4,17 @@ from sklearn.metrics import accuracy_score
 from sklearn.preprocessing import StandardScaler
 from sklearn.svm import LinearSVC
 
+import matplotlib.pyplot as plt
+
 from carnd_vehicle_detection import ROOT_DIR
-from carnd_vehicle_detection.preprocess import extract_features, read_training_data
+from carnd_vehicle_detection.preprocess import single_img_features, read_training_data, normalize_luminosity
 
 DEFAULT_CLASSIFIER_SAVE_PATH = os.path.join(ROOT_DIR, 'svm_classifier.p')
 
-# FIXME: how to structure the training and validation data sets for training the classifier?
-
-
-class DummyScaler:
-    def transform(self, x):
-        return x
-
-
-my_dummy_scaler = DummyScaler()
 
 def get_classifier(classifier_path=None, classifier_save_path=DEFAULT_CLASSIFIER_SAVE_PATH,
                    features_train=None, labels_train=None,
-                   features_valid=None, labels_valid=None):
+                   features_valid=None, labels_valid=None, extract_features_dict=None):
     """Read the vehicle / non-vehicle classifier, based on whether a non-None path is provided or not.
     
     :param classifier_path: The path of a previously trained classifier. Can be none, in which case the classifier is 
@@ -32,38 +25,46 @@ def get_classifier(classifier_path=None, classifier_save_path=DEFAULT_CLASSIFIER
     :param labels_train: Training labels as an numpy ndarray
     :param features_valid: Validation features as an numpy ndarray
     :param labels_valid: Validation labels as an numpy ndarray
-    :returns: A classifier object. 
+    :param extract_features_dict: The extract parameters in a dict. See the extract_features module for details
+    :return: A dict with keys 'classifier', 'score' and 'scaler', and corresponding values.
     """
 
-    # It is all or nothing baby. If any of these is missing, just use the defaults.
+    assert extract_features_dict is not None
 
-    # FIXME, this is just a placeholder
+    # It is all or nothing baby. If any of these is missing, just use the defaults.
 
     if classifier_path is not None:
         with open(classifier_path, 'rb') as classifier_file:
             classifier = pickle.load(classifier_file)
+        with open(".".join(classifier_save_path.split(".")[:-1]) + '_scaler.p', 'rb') as scaler_file:
+            scaler = pickle.load(scaler_file)
         score = None
-        scaler = None
     else:
         if None in (features_train, labels_train, features_valid, labels_valid):
             features_train, features_valid, labels_train, labels_valid = read_training_data()
-        extracted_features_train = extract_features(features_train)
-        extracted_features_valid = extract_features(features_valid)
+        extracted_features_train = [single_img_features(normalize_luminosity(img), **extract_features_dict)
+                                    for img in features_train]
+        extracted_features_valid = [single_img_features(normalize_luminosity(img), **extract_features_dict)
+                                    for img in features_valid]
         scaler = StandardScaler()
         scaler.fit(extracted_features_train)
         scaled_features_train = scaler.transform(extracted_features_train)
+        # plt.plot(list(range(len(scaled_features_train[0]))), scaled_features_train[0])
+        # plt.show()
         scaled_features_valid = scaler.transform(extracted_features_valid)
 
         classifier, score = train_classifier(scaled_features_train, labels_train, scaled_features_valid, labels_valid)
         if classifier_save_path is not None:
             with open(classifier_save_path, 'wb') as outfile:
                 pickle.dump(classifier, outfile)
+            with open(".".join(classifier_save_path.split(".")[:-1]) + '_scaler.p', 'wb') as scalerfile:
+                pickle.dump(scaler, scalerfile)
 
     return {'classifier': classifier, 'score': score, 'scaler': scaler}
 
 
-def train_classifier(features_train, labels_train, features_valid, labels_valid, output_path=DEFAULT_CLASSIFIER_SAVE_PATH):
-    """FIXME document the method. What kinds of features are acceptable etc.
+def train_classifier(features_train, labels_train, features_valid, labels_valid):
+    """Train a Linear SVM classifier based on the data provided as input. 
     :param features_train: The training features, FIXME
     :param labels_train: The training labels, a numpy ndarray of same length as features_train, containing zeros 
            and ones
