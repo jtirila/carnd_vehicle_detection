@@ -1,4 +1,4 @@
-from carnd_vehicle_detection.image_traversal.sliding_windows import slide_window
+from carnd_vehicle_detection.traverse_image.sliding_windows import slide_window
 import unittest
 import numpy as np
 

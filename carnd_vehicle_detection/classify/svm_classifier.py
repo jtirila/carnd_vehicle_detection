@@ -3,14 +3,14 @@ import pickle
 from glob import glob
 
 import numpy as np
-from carnd_vehicle_detection.preprocessing.read_classification_training_data import read_training_data
+from carnd_vehicle_detection.preprocess.read_classification_training_data import read_training_data
 from matplotlib import image as mpimg
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
 from sklearn.svm import LinearSVC
 
 from carnd_vehicle_detection import ROOT_DIR
-from carnd_vehicle_detection.preprocessing.extract_features import extract_features
+from carnd_vehicle_detection.preprocess.extract_features import extract_features
 
 DEFAULT_CLASSIFIER_SAVE_PATH = os.path.join(ROOT_DIR, 'svm_classifier.p')
 

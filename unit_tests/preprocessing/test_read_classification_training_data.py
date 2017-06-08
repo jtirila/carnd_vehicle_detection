@@ -1,4 +1,4 @@
-from carnd_vehicle_detection.preprocessing.read_classification_training_data import read_training_data
+from carnd_vehicle_detection.preprocess.read_classification_training_data import read_training_data
 from unit_tests import TEST_IMG_DIR
 import os
 import unittest
