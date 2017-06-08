@@ -39,5 +39,5 @@ detect_vehicles
 
 (Note: no point following the link just yet.)
 
-Udacity people, look this way please. My written report can be found by following [this link](./writeup-tirila-jm.md).
+Udacity people, look this way please. My written report can be found by following [this link](./WRITEUP_TIRILA_JM.md).
 
