@@ -90,4 +90,5 @@ def _process_image(image, classifier, scaler, fixme_container_of_previous_detect
 
 
 if __name__ == "__main__":
-    detect_vehicles(previous_classifier_path=_DEFAULT_CLASSIFIER_PATH)
+    # detect_vehicles(previous_classifier_path=_DEFAULT_CLASSIFIER_PATH)
+    detect_vehicles(previous_classifier_path=None)

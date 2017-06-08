@@ -8,6 +8,9 @@ SUBCLIP_OUTPUT_DIRECTORY = os.path.join(ROOT_DIR, 'unit_tests', 'test_videos')
 
 def save_subclips(video_path=PROJECT_VIDEO_PATH):
     clip = VideoFileClip(video_path)
+    subclip = clip.subclip(35, 36)
+    subclip.write_videofile(os.path.join(SUBCLIP_OUTPUT_DIRECTORY, 'subclip_35__36.mp4'),
+                            audio=False)
     for start in (0, 15, 30):
         subclip = clip.subclip(start, start + 5)
         subclip.write_videofile(os.path.join(SUBCLIP_OUTPUT_DIRECTORY, 'subclip_{}__{}.mp4'.format(start, start + 5)),

@@ -1,6 +1,7 @@
 import os
 import pickle
 from sklearn.metrics import accuracy_score
+from sklearn.preprocessing import StandardScaler
 from sklearn.svm import LinearSVC
 
 from carnd_vehicle_detection import ROOT_DIR
@@ -37,24 +38,27 @@ def get_classifier(classifier_path=None, classifier_save_path=DEFAULT_CLASSIFIER
     # It is all or nothing baby. If any of these is missing, just use the defaults.
 
     # FIXME, this is just a placeholder
-    scaler = my_dummy_scaler
 
     if classifier_path is not None:
         with open(classifier_path, 'rb') as classifier_file:
             classifier = pickle.load(classifier_file)
         score = None
+        scaler = None
     else:
         if None in (features_train, labels_train, features_valid, labels_valid):
             features_train, features_valid, labels_train, labels_valid = read_training_data()
-            extracted_features_train = extract_features(features_train)
-            extracted_features_valid = extract_features(features_valid)
-        else:
-            extracted_features_train = extract_features(features_train)
-            extracted_features_valid = extract_features(features_valid)
-        classifier, score = train_classifier(extracted_features_train, labels_train, extracted_features_valid, labels_valid)
+        extracted_features_train = extract_features(features_train)
+        extracted_features_valid = extract_features(features_valid)
+        scaler = StandardScaler()
+        scaler.fit(extracted_features_train)
+        scaled_features_train = scaler.transform(extracted_features_train)
+        scaled_features_valid = scaler.transform(extracted_features_valid)
+
+        classifier, score = train_classifier(scaled_features_train, labels_train, scaled_features_valid, labels_valid)
         if classifier_save_path is not None:
             with open(classifier_save_path, 'wb') as outfile:
                 pickle.dump(classifier, outfile)
+
     return {'classifier': classifier, 'score': score, 'scaler': scaler}
 
 
