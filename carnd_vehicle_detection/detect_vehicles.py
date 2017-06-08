@@ -26,9 +26,10 @@ def detect_vehicles(input_video_path=_PROJECT_VIDEO_PATH, output_path=_PROJECT_O
 
     clip = VideoFileClip(input_video_path)
     container_for_detections = None # FIXME
-    classifier = get_classifier(classifier_path)
-    transformed_clip = clip.fl_image(lambda image: _process_image(image, container_for_detections))
-    transformed_clip.write_videofile(output_path, audio=False)
+    classifier_and_score = get_classifier(classifier_path)
+    classifier = classifier_and_score['classifier']
+    # transformed_clip = clip.fl_image(lambda image: _process_image(image, container_for_detections))
+    # transformed_clip.write_videofile(output_path, audio=False)
 
 
 def _process_image(image, fixme_container_of_previous_detections_or_whatever):

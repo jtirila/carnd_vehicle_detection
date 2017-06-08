@@ -36,14 +36,18 @@ def get_classifier(classifier_path=None, classifier_save_path=DEFAULT_CLASSIFIER
     # It is all or nothing baby. If any of these is missing, just use the defaults.
     if classifier_path is not None:
         classifier = pickle.load(classifier_path)
+        score = None
     else:
         if None in (features_train, labels_train, features_valid, labels_valid):
             features_train, labels_train, features_valid, labels_valid = read_training_data()
             extracted_features_train = extract_features(features_train)
             extracted_features_valid = extract_features(features_valid)
-        classifier, _ = train_classifier(extracted_features_train, labels_train, extracted_features_valid, labels_valid)
-        pickle.dump(classifier, classifier_save_path)
-    return classifier
+        else:
+            extracted_features_train = extract_features(features_train)
+            extracted_features_valid = extract_features(features_valid)
+        classifier, score = train_classifier(extracted_features_train, labels_train, extracted_features_valid, labels_valid)
+        pickle.dump(classifier, open(classifier_save_path, 'wb'))
+    return {'classifier': classifier, 'score': score}
 
 
 def train_classifier(features_train, labels_train, features_valid, labels_valid, output_path=DEFAULT_CLASSIFIER_SAVE_PATH):

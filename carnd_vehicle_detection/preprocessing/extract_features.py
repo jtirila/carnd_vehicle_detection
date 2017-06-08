@@ -10,5 +10,5 @@ def extract_features(imgs):
 
     # FIXME
     transformed = np.array([img.ravel() for img in imgs])
-    return imgs
+    return transformed
 
