@@ -1,21 +1,22 @@
 import os
 import pickle
-from glob import glob
-
-import numpy as np
-from carnd_vehicle_detection.preprocess.read_classification_training_data import read_training_data
-from matplotlib import image as mpimg
-from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
 from sklearn.svm import LinearSVC
 
 from carnd_vehicle_detection import ROOT_DIR
-from carnd_vehicle_detection.preprocess.extract_features import extract_features
+from carnd_vehicle_detection.preprocess import extract_features, read_training_data
 
 DEFAULT_CLASSIFIER_SAVE_PATH = os.path.join(ROOT_DIR, 'svm_classifier.p')
 
 # FIXME: how to structure the training and validation data sets for training the classifier?
 
+
+class DummyScaler:
+    def transform(self, x):
+        return x
+
+
+my_dummy_scaler = DummyScaler()
 
 def get_classifier(classifier_path=None, classifier_save_path=DEFAULT_CLASSIFIER_SAVE_PATH,
                    features_train=None, labels_train=None,
@@ -35,7 +36,8 @@ def get_classifier(classifier_path=None, classifier_save_path=DEFAULT_CLASSIFIER
 
     # It is all or nothing baby. If any of these is missing, just use the defaults.
     if classifier_path is not None:
-        classifier = pickle.load(classifier_path)
+        with open(classifier_path, 'rb') as classifier_file:
+            classifier = pickle.load(classifier_file)
         score = None
     else:
         if None in (features_train, labels_train, features_valid, labels_valid):
@@ -46,9 +48,11 @@ def get_classifier(classifier_path=None, classifier_save_path=DEFAULT_CLASSIFIER
             extracted_features_train = extract_features(features_train)
             extracted_features_valid = extract_features(features_valid)
         classifier, score = train_classifier(extracted_features_train, labels_train, extracted_features_valid, labels_valid)
-        with open(classifier_save_path, 'wb') as outfile:
-            pickle.dump(classifier, outfile)
-    return {'classifier': classifier, 'score': score}
+        if classifier_save_path is not None:
+            with open(classifier_save_path, 'wb') as outfile:
+                pickle.dump(classifier, outfile)
+        scaler = my_dummy_scaler
+    return {'classifier': classifier, 'score': score, 'scaler': scaler}
 
 
 def train_classifier(features_train, labels_train, features_valid, labels_valid, output_path=DEFAULT_CLASSIFIER_SAVE_PATH):
