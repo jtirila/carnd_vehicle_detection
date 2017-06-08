@@ -46,7 +46,8 @@ def get_classifier(classifier_path=None, classifier_save_path=DEFAULT_CLASSIFIER
             extracted_features_train = extract_features(features_train)
             extracted_features_valid = extract_features(features_valid)
         classifier, score = train_classifier(extracted_features_train, labels_train, extracted_features_valid, labels_valid)
-        pickle.dump(classifier, open(classifier_save_path, 'wb'))
+        with open(classifier_save_path, 'wb') as outfile:
+            pickle.dump(classifier, outfile)
     return {'classifier': classifier, 'score': score}
 
 

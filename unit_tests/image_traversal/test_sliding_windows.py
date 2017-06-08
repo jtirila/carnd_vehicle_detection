@@ -9,7 +9,7 @@ class TestSlidingWindowsDifferentOverlaps(unittest.TestCase):
         img = np.zeros((64, 64, 3))
         win_list = slide_window(img, [None, None], [None, None], (32, 32), (0.0, 0.0))
         expected_win_list = [((0, 0), (32, 32)), ((32, 0), (64, 32)), ((0, 32), (32, 64)), ((32, 32), (64, 64))]
-        self.assertEquals(win_list, expected_win_list)
+        self.assertEqual(win_list, expected_win_list)
 
     def test_with_much_overlap(self):
         img = np.zeros((64, 64, 3))
@@ -21,7 +21,7 @@ class TestSlidingWindowsDifferentOverlaps(unittest.TestCase):
             ((0, 24), (32, 56)), ((8, 24), (40, 56)), ((16, 24), (48, 56)), ((24, 24), (56, 56)), ((32, 24), (64, 56)),
             ((0, 32), (32, 64)), ((8, 32), (40, 64)), ((16, 32), (48, 64)), ((24, 32), (56, 64)), ((32, 32), (64, 64))
         ]
-        self.assertEquals(win_list, expected_win_list)
+        self.assertEqual(win_list, expected_win_list)
 
 
 class TestSlidingWindowsDifferentRemainders(unittest.TestCase):
@@ -30,11 +30,11 @@ class TestSlidingWindowsDifferentRemainders(unittest.TestCase):
         img = np.zeros((64, 95, 3))
         win_list = slide_window(img, [None, None], [None, None], (32, 32), (0.0, 0.0))
         expected_win_list = [((0, 0), (32, 32)), ((32, 0), (64, 32)), ((0, 32), (32, 64)), ((32, 32), (64, 64))]
-        self.assertEquals(win_list, expected_win_list)
+        self.assertEqual(win_list, expected_win_list)
 
 
     def test_with_remainder_y(self):
         img = np.zeros((70, 64, 3))
         win_list = slide_window(img, [None, None], [None, None], (32, 32), (0.0, 0.0))
         expected_win_list = [((0, 0), (32, 32)), ((32, 0), (64, 32)), ((0, 32), (32, 64)), ((32, 32), (64, 64))]
-        self.assertEquals(win_list, expected_win_list)
+        self.assertEqual(win_list, expected_win_list)

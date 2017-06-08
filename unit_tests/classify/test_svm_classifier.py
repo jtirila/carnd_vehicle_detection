@@ -13,4 +13,4 @@ class TestSvmClassifier(unittest.TestCase):
         clf = clf_and_score['classifier']
         score = clf_and_score['score']
         self.assertTrue(isinstance(clf, LinearSVC))
-        self.assertEquals(score, 1.0)
+        self.assertEqual(score, 1.0)

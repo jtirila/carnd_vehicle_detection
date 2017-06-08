@@ -11,4 +11,4 @@ class TestSomething(unittest.TestCase):
 
     def test_reading_test_data(self):
         data = read_training_data(VEHICLES_TEST_IMAGE_EXPR, NONVEHICLES_TEST_IMAGE_EXPR)
-        self.assertEquals(len(data[0]) + len(data[1]), 20)
+        self.assertEqual(len(data[0]) + len(data[1]), 20)
