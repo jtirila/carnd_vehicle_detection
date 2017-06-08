@@ -30,8 +30,11 @@ def detect_vehicles(input_video_path=PROJECT_VIDEO_PATH, output_path=_PROJECT_OU
     :return: Nothing."""
 
     clip = VideoFileClip(input_video_path)
-    container_for_detections = None  # FIXME
+    container_for_detections = None  # FIXME instantiate something for every detected vehicle and keep them in this
+                                     # FIXME container, updating some values to track the vehicle (and also
+                                     # FIXME discard apparent spurious detections
     if classifier_training_data is not None:
+        assert isinstance(classifier_training_data, dict)
         training_data_params = [
             classifier_training_data['features_train'],
             classifier_training_data['labels_train'],

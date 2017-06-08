@@ -1,6 +1,6 @@
 import numpy as np
 import cv2
-from carnd_vehicle_detection.preprocess import single_img_features, extract_features
+from carnd_vehicle_detection.preprocess import single_img_features, get_hog_features, color_convert
 
 
 def search_windows(img, windows, clf, scaler, color_space='RGB',
@@ -10,7 +10,8 @@ def search_windows(img, windows, clf, scaler, color_space='RGB',
                    hog_channel=0, spatial_feat=True,
                    hist_feat=True, hog_feat=True):
     # 1) Create an empty list to receive positive detection windows
-    on_windows = []
+    on_windows = [on_window for on_window in fixme_something(windows) if on_window is not None]
+
     # 2) Iterate over all windows in the list
     for window in windows:
         # 3) Extract the test window from original image
@@ -20,6 +21,8 @@ def search_windows(img, windows, clf, scaler, color_space='RGB',
                                        spatial_size=spatial_size, hist_bins=hist_bins,
                                        orient=orient, pix_per_cell=pix_per_cell,
                                        cell_per_block=cell_per_block,
+                                       global_hog_features=global_hog_features,
+                                       global_color_converted=global_color_converted,
                                        hog_channel=hog_channel, spatial_feat=spatial_feat,
                                        hist_feat=hist_feat, hog_feat=hog_feat)
         # 5) Scale extracted features to be fed to classifier
@@ -31,3 +34,24 @@ def search_windows(img, windows, clf, scaler, color_space='RGB',
             on_windows.append(window)
     # 8) Return windows for positive detections
     return on_windows
+
+
+def fixme_something(img, windows, clf, scaler, color_space='RGB',
+                    spatial_size=(32, 32), hist_bins=32,
+                    hist_range=(0, 256), orient=9,
+                    pix_per_cell=8, cell_per_block=2,
+                    hog_channel=0, spatial_feat=True,
+                    hist_feat=True, hog_feat=True):
+    global_hog_features = get_hog_features(img, orient, pix_per_cell, cell_per_block, vis=False, feature_vec=False)
+    global_color_converted = color_convert(img, color_space)
+
+    for window in windows:
+        test_img = cv2.resize(img[window[0][1]:window[1][1], window[0][0]:window[1][0]], (64, 64))
+        features = single_img_features(test_img, color_space=color_space,
+                                       spatial_size=spatial_size, hist_bins=hist_bins,
+                                       orient=orient, pix_per_cell=pix_per_cell,
+                                       cell_per_block=cell_per_block,
+                                       global_hog_features=global_hog_features,
+                                       global_color_converted=global_color_converted,
+                                       hog_channel=hog_channel, spatial_feat=spatial_feat,
+                                       hist_feat=hist_feat, hog_feat=hog_feat)

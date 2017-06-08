@@ -27,10 +27,6 @@ class TestDetectVehiclesPipelineDoesNotFail(unittest.TestCase):
     def setUp(self):
         self._remove_output_videos()
 
-    def tearDown(self):
-        # self._remove_output_videos()
-        pass
-
     def test_detect_vehicles_excerpt_fails_not(self):
         features_train, features_valid, labels_train, labels_valid = read_training_data(VEHICLES_TEST_IMAGE_EXPR,
                                                                                         NONVEHICLES_TEST_IMAGE_EXPR)
