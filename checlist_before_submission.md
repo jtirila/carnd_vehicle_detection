@@ -8,4 +8,5 @@ This is my personal checklist to remember to do certain things before submitting
 * [ ] All important code is well documented
 * [ ] The code structure (directory hierarchy etc.) makes sense and naming is OK
 * [ ] Just for the sake of it, there are at least a couple of unit tests
-* [ ] Check if any files need to be renamed, for example if there are any requirements on the output video name
+* [ ] Any files need to be renamed, for example if there are any requirements on the output video name?
+* [ ] The repository structure tree in the write up has been update to match the code? 
