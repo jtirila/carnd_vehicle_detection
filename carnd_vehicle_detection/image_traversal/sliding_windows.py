@@ -1,3 +1,6 @@
+import numpy as np
+
+
 def slide_window(img, x_start_stop=[None, None], y_start_stop=[None, None],
                  xy_window=(64, 64), xy_overlap=(0.5, 0.5)):
     """Cycles through an image using the scheme determined by the parameters, and returns a list of 
@@ -14,13 +17,9 @@ def slide_window(img, x_start_stop=[None, None], y_start_stop=[None, None],
     x_start_stop[1] = img.shape[1] if x_start_stop[1] is None else x_start_stop[1]
     y_start_stop[0] = 0 if y_start_stop[0] is None else y_start_stop[0]
     y_start_stop[1] = img.shape[0] if y_start_stop[1] is None else y_start_stop[1]
+    overlap_coeffs = tuple([x[0] - x[1] for x in zip((1,)*2, xy_overlap)])
 
-    step_x, step_y = tuple(np.product(x) for x in zip(xy_window, xy_overlap))
-    num_win_x = (x_start_stop[1] - x_start_stop[0] - xy_window[0]) // step_x + 1
-    num_win_y = (y_start_stop[1] - y_start_stop[0] - xy_window[1]) // step_y + 1
-
-    print("Num win x: {}".format(num_win_x))
-    print("Num win y: {}".format(num_win_y))
+    step_x, step_y = tuple(np.product(x) for x in zip(xy_window, overlap_coeffs))
 
     y_win_top = y_start_stop[0]
     y_win_bottom = y_win_top + xy_window[1]
@@ -29,10 +28,10 @@ def slide_window(img, x_start_stop=[None, None], y_start_stop=[None, None],
     while True:
         x_win_left = x_start_stop[0]
         x_win_right = x_win_left + xy_window[0]
-        if y_win_bottom - 1 > y_start_stop[1]:
+        if y_win_bottom > y_start_stop[1]:
             break
         while True:
-            if x_win_right - 1 > x_start_stop[1]:
+            if x_win_right > x_start_stop[1]:
                 break
 
             window_list.append(((x_win_left, y_win_top), (x_win_right, y_win_bottom)))
