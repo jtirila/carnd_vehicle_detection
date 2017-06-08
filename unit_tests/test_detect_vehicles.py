@@ -10,11 +10,12 @@ NONVEHICLES_TEST_IMAGE_EXPR = os.path.join(TEST_IMG_DIR, 'nonvehicles', '**', '*
 _TEST_INPUT_VIDEO_PATH=os.path.join(os.path.dirname(__file__), 'test_videos', 'subclip_30__35.mp4')
 _TEST_OUTPUT_VIDEO_PATH=os.path.join(os.path.dirname(__file__), 'test_videos', 'subclip_30__35_processed.mp4')
 
-_TEST_EXCERPT_INPUT_VIDEO_PATH=os.path.join(os.path.dirname(__file__), 'test_videos', 'subclip_35__36.mp4')
-_TEST_EXCERPT_OUTPUT_VIDEO_PATH=os.path.join(os.path.dirname(__file__), 'test_videos', 'subclip_35__36_processed.mp4')
+_TEST_EXCERPT_INPUT_VIDEO_PATH = os.path.join(os.path.dirname(__file__), 'test_videos', 'subclip_35__36.mp4')
+_TEST_EXCERPT_OUTPUT_VIDEO_PATH = os.path.join(os.path.dirname(__file__), 'test_videos', 'subclip_35__36_processed.mp4')
 
 
 class TestDetectVehiclesPipelineDoesNotFail(unittest.TestCase):
+
     def _remove_output_videos(self):
         try:
             # Try to remove the output video, just in case it has been left hanging around

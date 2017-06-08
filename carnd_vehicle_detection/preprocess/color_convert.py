@@ -14,6 +14,8 @@ def color_convert(img, color_space):
             feature_image = cv2.cvtColor(img, cv2.COLOR_RGB2YUV)
         elif color_space == 'YCrCb':
             feature_image = cv2.cvtColor(img, cv2.COLOR_RGB2YCrCb)
+        elif color_space == 'GRAY':
+            feature_image = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
     else:
         feature_image = np.copy(img)
     return feature_image
