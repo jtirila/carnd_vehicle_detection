@@ -35,13 +35,17 @@ def get_classifier(classifier_path=None, classifier_save_path=DEFAULT_CLASSIFIER
     """
 
     # It is all or nothing baby. If any of these is missing, just use the defaults.
+
+    # FIXME, this is just a placeholder
+    scaler = my_dummy_scaler
+
     if classifier_path is not None:
         with open(classifier_path, 'rb') as classifier_file:
             classifier = pickle.load(classifier_file)
         score = None
     else:
         if None in (features_train, labels_train, features_valid, labels_valid):
-            features_train, labels_train, features_valid, labels_valid = read_training_data()
+            features_train, features_valid, labels_train, labels_valid = read_training_data()
             extracted_features_train = extract_features(features_train)
             extracted_features_valid = extract_features(features_valid)
         else:
@@ -51,7 +55,6 @@ def get_classifier(classifier_path=None, classifier_save_path=DEFAULT_CLASSIFIER
         if classifier_save_path is not None:
             with open(classifier_save_path, 'wb') as outfile:
                 pickle.dump(classifier, outfile)
-        scaler = my_dummy_scaler
     return {'classifier': classifier, 'score': score, 'scaler': scaler}
 
 

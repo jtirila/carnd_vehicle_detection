@@ -7,8 +7,8 @@ from carnd_vehicle_detection import detect_vehicles
 VEHICLES_TEST_IMAGE_EXPR = os.path.join(TEST_IMG_DIR, 'vehicles', '**', '*png')
 NONVEHICLES_TEST_IMAGE_EXPR = os.path.join(TEST_IMG_DIR, 'nonvehicles', '**', '*.png')
 
-_TEST_INPUT_VIDEO_PATH=os.path.join(os.path.dirname(__file__), 'test_videos', 'subclip_0__5.mp4')
-_TEST_OUTPUT_VIDEO_PATH=os.path.join(os.path.dirname(__file__), 'test_videos', 'subclip_0__5_processed.mp4')
+_TEST_INPUT_VIDEO_PATH=os.path.join(os.path.dirname(__file__), 'test_videos', 'subclip_30__35.mp4')
+_TEST_OUTPUT_VIDEO_PATH=os.path.join(os.path.dirname(__file__), 'test_videos', 'subclip_30__35_processed.mp4')
 
 
 class TestDetectVehiclesPipelineDoesNotFail(unittest.TestCase):
@@ -24,7 +24,7 @@ class TestDetectVehiclesPipelineDoesNotFail(unittest.TestCase):
         self._remove_output_video()
 
     def tearDown(self):
-        self._remove_output_video()
+        # self._remove_output_video()
         pass
 
     def test_detect_vehicles_fails_not(self):

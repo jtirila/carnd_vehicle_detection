@@ -73,10 +73,10 @@ def _process_image(image, classifier, scaler, fixme_container_of_previous_detect
     spatial_feat = True # Spatial features on or off
     hist_feat = True  # Histogram features on or off
     hog_feat = True  # HOG features on or off
-    y_start_stop = [500, None]  # Min and max in y to search in slide_window()
+    y_start_stop = [360, None]  # Min and max in y to search in slide_window()
 
     windows = slide_window(image, x_start_stop=[None, None], y_start_stop=y_start_stop,
-                           xy_window=(64, 64), xy_overlap=(0.5, 0.5))
+                           xy_window=(128, 128), xy_overlap=(0.7, 0.7))
 
     hot_windows = search_windows(image, windows, classifier, scaler, color_space=color_space,
                                  spatial_size=spatial_size, hist_bins=hist_bins,
@@ -90,4 +90,4 @@ def _process_image(image, classifier, scaler, fixme_container_of_previous_detect
 
 
 if __name__ == "__main__":
-    detect_vehicles()
+    detect_vehicles(previous_classifier_path=_DEFAULT_CLASSIFIER_PATH)
