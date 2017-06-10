@@ -9,15 +9,6 @@ from carnd_vehicle_detection.preprocess import extract_features, read_training_d
 
 DEFAULT_CLASSIFIER_SAVE_PATH = os.path.join(ROOT_DIR, 'svm_classifier.p')
 
-# FIXME: how to structure the training and validation data sets for training the classifier?
-
-
-class DummyScaler:
-    def transform(self, x):
-        return x
-
-
-my_dummy_scaler = DummyScaler()
 
 def get_classifier(classifier_path=None, classifier_save_path=DEFAULT_CLASSIFIER_SAVE_PATH,
                    features_train=None, labels_train=None,
@@ -37,18 +28,17 @@ def get_classifier(classifier_path=None, classifier_save_path=DEFAULT_CLASSIFIER
 
     # It is all or nothing baby. If any of these is missing, just use the defaults.
 
-    # FIXME, this is just a placeholder
-
     if classifier_path is not None:
         with open(classifier_path, 'rb') as classifier_file:
             classifier = pickle.load(classifier_file)
+        with open(".".join(classifier_save_path.split(".")[:-1]) + '_scaler.p', 'rb') as scaler_file:
+            scaler = pickle.load(scaler_file)
         score = None
-        scaler = None
     else:
         if None in (features_train, labels_train, features_valid, labels_valid):
             features_train, features_valid, labels_train, labels_valid = read_training_data()
-        extracted_features_train = extract_features(features_train)
-        extracted_features_valid = extract_features(features_valid)
+        extracted_features_train = extract_features(features_train, hog_channel=0, color_space='YCrCb')
+        extracted_features_valid = extract_features(features_valid, hog_channel=0, color_space='YCrCb')
         scaler = StandardScaler()
         scaler.fit(extracted_features_train)
         scaled_features_train = scaler.transform(extracted_features_train)
@@ -58,11 +48,13 @@ def get_classifier(classifier_path=None, classifier_save_path=DEFAULT_CLASSIFIER
         if classifier_save_path is not None:
             with open(classifier_save_path, 'wb') as outfile:
                 pickle.dump(classifier, outfile)
+            with open(".".join(classifier_save_path.split(".")[:-1]) + '_scaler.p', 'wb') as scalerfile:
+                pickle.dump(scaler, scalerfile)
 
     return {'classifier': classifier, 'score': score, 'scaler': scaler}
 
 
-def train_classifier(features_train, labels_train, features_valid, labels_valid, output_path=DEFAULT_CLASSIFIER_SAVE_PATH):
+def train_classifier(features_train, labels_train, features_valid, labels_valid):
     """FIXME document the method. What kinds of features are acceptable etc.
     :param features_train: The training features, FIXME
     :param labels_train: The training labels, a numpy ndarray of same length as features_train, containing zeros 

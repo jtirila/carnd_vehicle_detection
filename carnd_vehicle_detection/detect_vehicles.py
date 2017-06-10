@@ -2,15 +2,17 @@
 # FIXME: thing to run once everything is in place
 
 import os
+import numpy as np
 
 from moviepy.editor import VideoFileClip
 
 from carnd_vehicle_detection import ROOT_DIR
 # This is the default video name.
 from carnd_vehicle_detection.classify.svm_classifier import get_classifier
-from carnd_vehicle_detection.traverse_image.sliding_windows import slide_window
-from carnd_vehicle_detection.traverse_image.search_windows import search_windows
+from carnd_vehicle_detection.traverse_image import slide_window, all_windows_divisible_by
+from carnd_vehicle_detection.traverse_image import search_windows
 from carnd_vehicle_detection.visualize import draw_boxes
+from carnd_vehicle_detection.utils.find_cars import find_cars
 
 PROJECT_VIDEO_PATH = os.path.join(ROOT_DIR, 'project_video.mp4')
 _PROJECT_OUTPUT_PATH = os.path.join(ROOT_DIR, 'transformed.mp4')
@@ -66,27 +68,51 @@ def _process_image(image, classifier, scaler, fixme_container_of_previous_detect
            detections
     :return: an rgb image containing the detection visualizations"""
 
-    color_space = 'RGB'  # Can be RGB, HSV, LUV, HLS, YUV, YCrCb
-    orient = 13  # HOG orientations
+    return _search_for_cars(image, classifier, scaler)
+
+
+def _search_for_cars(image, classifier, scaler):
+    color_space = 'YCrCb'  # Can be RGB, HSV, LUV, HLS, YUV, YCrCb
+    orient = 9  # HOG orientations
     pix_per_cell = 8  # HOG pixels per cell
     cell_per_block = 2  # HOG cells per block
-    hog_channel = 'ALL'  # Can be 0, 1, 2, or "ALL"
+    hog_channel = 0  # Can be 0, 1, 2, or "ALL"
     spatial_size = (16, 16)  # Spatial binning dimensions
     hist_bins = 16  # Number of histogram bins
     spatial_feat = True # Spatial features on or off
     hist_feat = True  # Histogram features on or off
     hog_feat = True  # HOG features on or off
     y_start_stop = [360, None]  # Min and max in y to search in slide_window()
+    x_start_stop = [None, None]
+    xy_window = (64, 64)
+    xy_overlap = (0.75, 0.75)
 
-    windows = slide_window(image, x_start_stop=[None, None], y_start_stop=y_start_stop,
-                           xy_window=(128, 128), xy_overlap=(0.7, 0.7))
 
-    hot_windows = search_windows(image, windows, classifier, scaler, color_space=color_space,
-                                 spatial_size=spatial_size, hist_bins=hist_bins,
-                                 orient=orient, pix_per_cell=pix_per_cell,
-                                 cell_per_block=cell_per_block,
-                                 hog_channel=hog_channel, spatial_feat=spatial_feat,
-                                 hist_feat=hist_feat, hog_feat=hog_feat)
+    hot_windows = []
+    for scale in (1, 1.5, 2):
+        xy_win = tuple([int(np.product(x)) for x in zip(xy_window, (scale,) * 2)])
+
+        # Assert that the pix per cell used for hog divides window size, step size and starting point in both directions
+        # This is essential for the hog feature alignments to work.
+
+        # return find_cars(image, y_start_stop[0], y_start_stop[1], 1, classifier, scaler, orient, pix_per_cell,
+        #                  cell_per_block, spatial_size, hist_bins, color_space)
+
+        scale_pix_per_cell = int(scale * pix_per_cell)
+
+        windows = slide_window(image, x_start_stop=x_start_stop, y_start_stop=y_start_stop,
+                               xy_window=xy_win, xy_overlap=xy_overlap)
+
+        # Assert that the pix per cell used for hog divides window size, step size and starting point in both directions
+        # This is essential for the hog feature alignments to work.
+        assert all_windows_divisible_by(windows,  scale_pix_per_cell, x_start_stop[0], y_start_stop[0])
+
+        hot_windows.extend(search_windows(image, windows, classifier, scaler, color_space=color_space,
+                                     spatial_size=spatial_size, hist_bins=hist_bins,
+                                     orient=orient, pix_per_cell=scale_pix_per_cell,
+                                     cell_per_block=cell_per_block,
+                                     hog_channel=hog_channel, spatial_feat=spatial_feat,
+                                     hist_feat=hist_feat, hog_feat=hog_feat))
 
     window_image = draw_boxes(image, hot_windows, color=(0, 0, 255), thick=6)
     return window_image

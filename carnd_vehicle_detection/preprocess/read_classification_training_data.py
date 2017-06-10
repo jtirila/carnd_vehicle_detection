@@ -1,6 +1,7 @@
 import os
 from carnd_vehicle_detection import ROOT_DIR
 from sklearn.model_selection import train_test_split
+from sklearn.utils import shuffle
 from glob import glob
 import numpy as np
 import matplotlib.image as mpimg
@@ -20,4 +21,5 @@ def read_training_data(vehicles_search_expr=DEFAULT_VEHICLE_IMAGE_SEARCH_EXPRESS
     nonvehicle_labels = np.full(nonvehicles.shape[0], 0)
     features = np.vstack((vehicles, nonvehicles))
     labels = np.hstack((vehicle_labels, nonvehicle_labels))
+    features, labels = shuffle(features, labels)
     return train_test_split(features, labels, test_size=0.33, random_state=np.random.randint(1000))

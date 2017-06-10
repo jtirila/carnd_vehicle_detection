@@ -42,3 +42,15 @@ def slide_window(img, x_start_stop=[None, None], y_start_stop=[None, None],
         # Increment the top and bottom positions of the window by step size in y direction
         y_win_top, y_win_bottom = tuple([int(sum(x)) for x in zip((y_win_top, y_win_bottom), (step_y, ) * 2)])
     return window_list
+
+
+def all_windows_divisible_by(windows, n, x_start, y_start):
+    """FIXME: Two-tuples containing the opposing edge coordinates, all values divisible by n"""
+    rwindows = np.ravel(windows)
+    xs = np.zeros_like(rwindows)
+    xs[::2] = x_start
+    xs[1::2] = y_start
+    return not any((rwindows - xs) % n)
+
+
+
