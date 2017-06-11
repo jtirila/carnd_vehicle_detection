@@ -50,7 +50,8 @@ def all_windows_divisible_by(windows, n, x_start, y_start):
     xs = np.zeros_like(rwindows)
     xs[::2] = x_start
     xs[1::2] = y_start
-    return not any((rwindows - xs) % n)
+    result = not any((rwindows - xs) % n)
+    return result
 
 
 

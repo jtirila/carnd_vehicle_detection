@@ -5,14 +5,14 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.svm import LinearSVC
 
 from carnd_vehicle_detection import ROOT_DIR
-from carnd_vehicle_detection.preprocess import extract_features, read_training_data
+from carnd_vehicle_detection.preprocess import single_img_features, read_training_data
 
 DEFAULT_CLASSIFIER_SAVE_PATH = os.path.join(ROOT_DIR, 'svm_classifier.p')
 
 
 def get_classifier(classifier_path=None, classifier_save_path=DEFAULT_CLASSIFIER_SAVE_PATH,
                    features_train=None, labels_train=None,
-                   features_valid=None, labels_valid=None):
+                   features_valid=None, labels_valid=None, extract_features_dict=None):
     """Read the vehicle / non-vehicle classifier, based on whether a non-None path is provided or not.
     
     :param classifier_path: The path of a previously trained classifier. Can be none, in which case the classifier is 
@@ -23,8 +23,11 @@ def get_classifier(classifier_path=None, classifier_save_path=DEFAULT_CLASSIFIER
     :param labels_train: Training labels as an numpy ndarray
     :param features_valid: Validation features as an numpy ndarray
     :param labels_valid: Validation labels as an numpy ndarray
-    :returns: A classifier object. 
+    :param extract_features_dict: The extract parameters in a dict. See the extract_features module for details
+    :return: A dict with keys 'classifier', 'score' and 'scaler', and corresponding values.
     """
+
+    assert extract_features_dict is not None
 
     # It is all or nothing baby. If any of these is missing, just use the defaults.
 
@@ -37,8 +40,8 @@ def get_classifier(classifier_path=None, classifier_save_path=DEFAULT_CLASSIFIER
     else:
         if None in (features_train, labels_train, features_valid, labels_valid):
             features_train, features_valid, labels_train, labels_valid = read_training_data()
-        extracted_features_train = extract_features(features_train, hog_channel=0, color_space='YCrCb')
-        extracted_features_valid = extract_features(features_valid, hog_channel=0, color_space='YCrCb')
+        extracted_features_train = [single_img_features(img, **extract_features_dict) for img in features_train]
+        extracted_features_valid = [single_img_features(img, **extract_features_dict) for img in features_valid]
         scaler = StandardScaler()
         scaler.fit(extracted_features_train)
         scaled_features_train = scaler.transform(extracted_features_train)
@@ -55,7 +58,7 @@ def get_classifier(classifier_path=None, classifier_save_path=DEFAULT_CLASSIFIER
 
 
 def train_classifier(features_train, labels_train, features_valid, labels_valid):
-    """FIXME document the method. What kinds of features are acceptable etc.
+    """Train a Linear SVM classifier based on the data provided as input. 
     :param features_train: The training features, FIXME
     :param labels_train: The training labels, a numpy ndarray of same length as features_train, containing zeros 
            and ones
