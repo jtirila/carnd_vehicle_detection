@@ -6,10 +6,22 @@ def single_img_features(img, color_space='RGB', spatial_size=(32, 32), hist_bins
                         img_hog_features=None, spatial_feat=True, hist_feat=True, hog_feat=True, orient=9,
                         pix_per_cell=8, cell_per_block=2, hog_channel="ALL"):
 
-
-    """FIXME_ document. At this point, this is just plain copy-paste from lab.
+    """A function to extract the features from an image.
     
-    :param global_hog_features"""
+    :param img: the original rgb image
+    :param color_space: the color space to convert the image into
+    :param spatial_size: For the bin_spatial method, the image size to use
+    :param hist_bins: for the color histogram the number of bins to use
+    :param bins_range: the value range for color histogram
+    :param img_hog_features: for single-pass hog processing, the hog features corresponding to this particular image 
+           segment
+    :param orient: The number of orientation bins for HOG 
+    :param pix_per_cell: cell size for HOG
+    :param cell_per_block: block size for HOG
+    :param hog_channel: channel for HOG
+    :param spatial_feat: Boolean, whether to use bin_spatial features in the final feature vector
+    :param hist_feat: Boolean, whether to use color histogram features in the final feature vector
+    :param hog_feat: Boolean, whether to use HOG features in the final feature vector"""
 
     # 1) Define an empty list to receive features
     img_copy = convert_color(img, color_space)
@@ -30,7 +42,7 @@ def single_img_features(img, color_space='RGB', spatial_size=(32, 32), hist_bins
             img_features.append(img_hog_features.ravel())
         else:
             # FIXME: First attempting to use grayscaling. Other color conversions are possible too.
-            hog_features = get_hog_features(img_copy[:, :, 2], orient, pix_per_cell, cell_per_block, vis=False, feature_vec=True)
+            hog_features = get_hog_features(img_copy[:, :, hog_channel], orient, pix_per_cell, cell_per_block, vis=False, feature_vec=True)
             img_features.append(hog_features)
 
     # 9) Return concatenated array of features
