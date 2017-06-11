@@ -11,7 +11,17 @@ def search_windows(img, windows, clf, scaler, color_space='RGB',
                    hog_channel=0, spatial_feat=True,
                    hist_feat=True, hog_feat=True):
     """A generator function to iterate over the windows and yield the ones for which prediction is 'vehicle', 
-    otherwise (implicitly) None."""
+    otherwise (implicitly) None.
+    
+    :param img: the original rgb image
+    :param windows: the list of windows to use for choosing candidate images
+    :param clf: the classifier
+    :param scaler: the scaler
+    
+    For the rest of the params, see the documentation of single_img_features. Some of them are used here as well 
+    with the same semantics.
+    
+    :yield: """
 
     assert all_windows_divisible_by(windows, pix_per_cell, windows[0][0][0], windows[0][0][1])
     feature_image = convert_color(img, color_space)
@@ -23,7 +33,6 @@ def search_windows(img, windows, clf, scaler, color_space='RGB',
                 get_hog_features(feature_image[:, :, channel],
                                  orient, pix_per_cell, cell_per_block,
                                  vis=False, feature_vec=False))
-        global_hog_features = np.dstack(global_hog_features)
     else:
         global_hog_features = get_hog_features(feature_image[:, :, hog_channel], orient,
                                                pix_per_cell, cell_per_block, vis=False, feature_vec=False)
@@ -36,13 +45,19 @@ def search_windows(img, windows, clf, scaler, color_space='RGB',
         hog_x_end = int(window[1][0] / pix_per_cell) - 1
         hog_y_start = int(window[0][1] / pix_per_cell)
         hog_y_end = int(window[1][1] / pix_per_cell) - 1
-        img_hog_features = global_hog_features[hog_y_start:hog_y_end, hog_x_start:hog_x_end, :, :, :]
-        img_hog_features = img_hog_features.ravel()
+        if hog_channel == "ALL":
+            img_hog_features = [global_hog_features[0][hog_y_start:hog_y_end, hog_x_start:hog_x_end, :, :, :],
+                                global_hog_features[0][hog_y_start:hog_y_end, hog_x_start:hog_x_end, :, :, :],
+                                global_hog_features[0][hog_y_start:hog_y_end, hog_x_start:hog_x_end, :, :, :]
+                               ]
+        else:
+            img_hog_features = global_hog_features[hog_y_start:hog_y_end, hog_x_start:hog_x_end, :, :, :]
+
         features = single_img_features(test_img, color_space=color_space,
                                        spatial_size=spatial_size, hist_bins=hist_bins,
                                        bins_range=hist_range,
                                        img_hog_features=img_hog_features,
-                                       spatial_feat=spatial_feat,
+                                       spatial_feat=spatial_feat, hog_channel=hog_channel,
                                        hist_feat=hist_feat, hog_feat=hog_feat)
 
         # 5) Scale extracted features to be fed to classifier

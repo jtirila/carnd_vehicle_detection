@@ -10,7 +10,8 @@ def bin_spatial(img, size=(32, 32)):
     :return: a 1-dim feature vector"""
 
     img_cc = np.copy(img)
+
+    # Resize, flatten, then return
     small_img = cv2.resize(img_cc, size)
     features = small_img.ravel()
-    # Return the feature vector
     return features

@@ -73,9 +73,9 @@ class DetectedVehicle:
         """
         for win1_tmp, win2_tmp in ((win1, win2), (win2, win1)):
             win1left, win2right = win1_tmp[0][0], win2_tmp[1][0]
-            if win1left > win2right:
+            if win1left >= win2right:
                 return False
             win1top, win2bottom = win1_tmp[0][1], win2_tmp[1][1]
-            if win1top > win2bottom:
+            if win1top >= win2bottom:
                 return False
         return True

@@ -22,15 +22,15 @@ _DEFAULT_CLASSIFIER_PATH = os.path.join(ROOT_DIR, 'classifier.p')
 
 
 EXTRACT_PARAMS = {
-    'color_space': 'LUV',
+    'color_space': 'YCrCb',
     'orient': 9,
     'pix_per_cell': 8,
     'cell_per_block': 2,
-    'hog_channel': 0,
+    'hog_channel': "ALL",
     'spatial_size': (32, 32),
     'hist_bins': 32,
     'spatial_feat': True,
-    'hist_feat': False,
+    'hist_feat': True,
     'hog_feat': True
 }
 
@@ -149,10 +149,10 @@ def _search_for_cars(raw_image, classifier, scaler, scales=_SCALES,
 
         box_color = {1: (255, 0, 0), 1.5: (0, 255, 0), 2: (0, 0, 255),
                      2.5: (128, 0, 128), 3: (0, 0, 0), 4: (255, 255, 255)}[scale]
-    window_image = draw_boxes(window_image, hot_windows, color=box_color, thick=3)
+        window_image = draw_boxes(window_image, hot_windows, color=box_color, thick=3)
     return window_image
 
 
 if __name__ == "__main__":
-    detect_vehicles(previous_classifier_path=_DEFAULT_CLASSIFIER_PATH)
-    # detect_vehicles(previous_classifier_path=None)
+    # detect_vehicles(previous_classifier_path=_DEFAULT_CLASSIFIER_PATH)
+    detect_vehicles(previous_classifier_path=None)
