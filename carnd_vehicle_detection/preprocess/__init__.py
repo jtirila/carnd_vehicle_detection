@@ -4,3 +4,4 @@ from .bin_spatial import bin_spatial
 from .color_convert import convert_color
 from .extract_features import single_img_features
 from .read_classification_training_data import read_training_data
+from .color_convert import normalize_luminosity
