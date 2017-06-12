@@ -3,6 +3,7 @@ from moviepy.editor import VideoFileClip
 from unit_tests import TEST_IMG_DIR
 from glob import glob
 import matplotlib.image as mpimg
+import numpy as np
 
 import cv2
 import os
@@ -27,10 +28,25 @@ def save_some_frames_and_subframes():
             full_filename = "test_frame_{}.png".format(saved_pair_count)
             sub_filename_1 = "test_subframe_{}_1.png".format(saved_pair_count)
             sub_filename_2 = "test_subframe_{}_2.png".format(saved_pair_count)
+            sub_filename_3 = "test_subframe_{}_3.png".format(saved_pair_count)
+            sub_filename_4 = "test_subframe_{}_4.png".format(saved_pair_count)
+            sub_filename_5 = "test_subframe_{}_5.png".format(saved_pair_count)
+            sub_filename_6 = "test_subframe_{}_6.png".format(saved_pair_count)
             saved_pair_count += 1
-            mpimg.imsave(os.path.join(TEST_IMG_DIR, full_filename), cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
-            mpimg.imsave(os.path.join(TEST_IMG_DIR, sub_filename_1), cv2.cvtColor(frame[:65, :65, :], cv2.COLOR_BGR2RGB))
-            mpimg.imsave(os.path.join(TEST_IMG_DIR, sub_filename_2), cv2.cvtColor(frame[410:475, 130:195, :], cv2.COLOR_BGR2RGB))
+            mpimg.imsave(os.path.join(TEST_IMG_DIR, full_filename),
+                         cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
+            mpimg.imsave(os.path.join(TEST_IMG_DIR, sub_filename_1),
+                         cv2.cvtColor(frame[:64, :64, :], cv2.COLOR_BGR2RGB))
+            mpimg.imsave(os.path.join(TEST_IMG_DIR, sub_filename_2),
+                         cv2.cvtColor(frame[410:474, 130:194, :], cv2.COLOR_BGR2RGB))
+            mpimg.imsave(os.path.join(TEST_IMG_DIR, sub_filename_3),
+                         cv2.cvtColor(frame[400:464, 128:194, :], cv2.COLOR_BGR2RGB))
+            mpimg.imsave(os.path.join(TEST_IMG_DIR, sub_filename_4),
+                         cv2.cvtColor(frame[400:464, 248:312, :], cv2.COLOR_BGR2RGB))
+            mpimg.imsave(os.path.join(TEST_IMG_DIR, sub_filename_5),
+                         cv2.cvtColor(frame[396:492, 120:216, :], cv2.COLOR_BGR2RGB))
+            mpimg.imsave(os.path.join(TEST_IMG_DIR, sub_filename_6),
+                         cv2.cvtColor(frame[420:516, 144:240, :], cv2.COLOR_BGR2RGB))
         else:
             continue
         if cv2.waitKey(1) & 0xFF == ord('q'):

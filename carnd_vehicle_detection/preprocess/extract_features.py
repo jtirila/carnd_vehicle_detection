@@ -44,7 +44,7 @@ def single_img_features(img, color_space='RGB', spatial_size=(32, 32), hist_bins
     # 7) Compute HOG features if flag is set
     if hog_feat:
         if img_hog_features is not None:
-            img_features.append(img_hog_features.ravel())
+            img_features.append(np.ravel(img_hog_features))
         else:
             hog_features = []
             if hog_channel == "ALL":

@@ -9,9 +9,8 @@ def bin_spatial(img, size=(32, 32)):
     :param size: A two-tuple containing the new size
     :return: a 1-dim feature vector"""
 
-    img_cc = np.copy(img)
+    color1 = cv2.resize(img[:, :, 0], size).ravel()
+    color2 = cv2.resize(img[:, :, 1], size).ravel()
+    color3 = cv2.resize(img[:, :, 2], size).ravel()
+    return np.hstack((color1, color2, color3))
 
-    # Resize, flatten, then return
-    small_img = cv2.resize(img_cc, size)
-    features = small_img.ravel()
-    return features
