@@ -144,10 +144,8 @@ def single_img_features(img, color_space='RGB', spatial_size=(32, 32), hist_bins
         # 6) Append features to list
         img_features.append(hist_features)
 
-
     # 9) Return concatenated array of features
     return np.concatenate(img_features)
-
 
 
 def extract_global_hog_features(channels_dict, orient, pix_per_cell, cell_per_block, hog_channel):

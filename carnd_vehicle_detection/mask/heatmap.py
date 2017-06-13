@@ -1,4 +1,17 @@
-def add_heat(heatmap, bbox_list):
+import numpy as np
+from scipy.ndimage.measurements import label
+
+
+def add_labeled_heatmap(image, hot_windows):
+    heat = np.zeros_like(image[:, :, 0]).astype(np.float)
+    heat = _add_heat(heat, hot_windows)
+    heatmap = np.clip(heat, 0, 255)
+    heatmap = _apply_threshold(heatmap, 28)
+    labels = label(heatmap)
+    return labels
+
+
+def _add_heat(heatmap, bbox_list):
     # Iterate through list of bboxes
     for box in bbox_list:
         # Add += 1 for all pixels inside each bbox
@@ -9,7 +22,7 @@ def add_heat(heatmap, bbox_list):
     return heatmap  # Iterate through list of bboxes
 
 
-def apply_threshold(heatmap, threshold):
+def _apply_threshold(heatmap, threshold):
     # Zero out pixels below the threshold
     heatmap[heatmap <= threshold] = 0
     # Return thresholded map
