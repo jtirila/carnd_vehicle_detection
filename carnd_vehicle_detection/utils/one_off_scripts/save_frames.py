@@ -40,7 +40,7 @@ def save_some_frames_and_subframes():
             mpimg.imsave(os.path.join(TEST_IMG_DIR, sub_filename_2),
                          cv2.cvtColor(frame[410:474, 130:194, :], cv2.COLOR_BGR2RGB))
             mpimg.imsave(os.path.join(TEST_IMG_DIR, sub_filename_3),
-                         cv2.cvtColor(frame[400:464, 128:194, :], cv2.COLOR_BGR2RGB))
+                         cv2.cvtColor(frame[400:464, 128:192, :], cv2.COLOR_BGR2RGB))
             mpimg.imsave(os.path.join(TEST_IMG_DIR, sub_filename_4),
                          cv2.cvtColor(frame[400:464, 248:312, :], cv2.COLOR_BGR2RGB))
             mpimg.imsave(os.path.join(TEST_IMG_DIR, sub_filename_5),

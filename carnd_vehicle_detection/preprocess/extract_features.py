@@ -9,6 +9,16 @@ EXTRACT_PARAMS_KEYS = {'color_space', 'orient', 'pix_per_cell', 'cell_per_block'
 
 
 def extract_prediction_features(ctrans_tosearch, X_scaler, **params):
+    """Extract features from a subimage of a frame, based on the previously extracted global HOG features and
+     other parameter values.
+     
+     :param ctrans_tosearch: FIXME
+     :param X_scaler: FIXME
+     :param params: A dict with the structure outlined in the assertiond ans assignments below.
+    
+    :return: A list of 'hot windows', in the format 
+                 [((x_topleft_ho1, y_topleft_hot1), (x_bottomright_hot1, y_bottomright_hot1)), 
+                 ((x_topleft_hot2, y_topleft_hot2), (x_bottomright_hot2, y_bottomright_hot2)), ...]"""
 
     global_hog_features = params['global_hog_features']
     window_params = params['window_params']
@@ -137,5 +147,20 @@ def single_img_features(img, color_space='RGB', spatial_size=(32, 32), hist_bins
 
     # 9) Return concatenated array of features
     return np.concatenate(img_features)
+
+
+
+def extract_global_hog_features(channels_dict, orient, pix_per_cell, cell_per_block, hog_channel):
+    common_pos_params = (orient, pix_per_cell, cell_per_block)
+    common_kw_params = {'feature_vec': False}
+    if hog_channel == "ALL":
+        hog0 = get_hog_features(channels_dict[0], *common_pos_params, **common_kw_params)
+        hog1 = get_hog_features(channels_dict[1], *common_pos_params, **common_kw_params)
+        hog2 = get_hog_features(channels_dict[2], *common_pos_params, **common_kw_params)
+        return {'hog0': hog0, 'hog1': hog1, 'hog2': hog2}
+    else:
+        return {'hog': get_hog_features(channels_dict[hog_channel],
+                                        *common_pos_params,
+                                        **common_kw_params)}
 
 

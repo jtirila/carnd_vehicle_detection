@@ -16,8 +16,8 @@ from carnd_vehicle_detection.visualize import draw_labeled_bboxes
 # PROJECT_VIDEO_PATH = os.path.join(ROOT_DIR, 'project_video.mp4')
 # PROJECT_VIDEO_PATH = os.path.join(ROOT_DIR, 'unit_tests', 'test_videos', 'subclip_0__15.mp4')
 # PROJECT_VIDEO_PATH = os.path.join(ROOT_DIR, 'unit_tests', 'test_videos', 'subclip_15__20.mp4')
-# PROJECT_VIDEO_PATH = os.path.join(ROOT_DIR, 'unit_tests', 'test_videos', 'subclip_15__30.mp4')
-PROJECT_VIDEO_PATH = os.path.join(ROOT_DIR, 'unit_tests', 'test_videos', 'subclip_35__36.mp4')
+PROJECT_VIDEO_PATH = os.path.join(ROOT_DIR, 'unit_tests', 'test_videos', 'subclip_15__30.mp4')
+# PROJECT_VIDEO_PATH = os.path.join(ROOT_DIR, 'unit_tests', 'test_videos', 'subclip_35__36.mp4')
 
 _PROJECT_OUTPUT_PATH = os.path.join(ROOT_DIR, 'transformed.mp4')
 _DEFAULT_CLASSIFIER_PATH = os.path.join(ROOT_DIR, 'classifier.p')
@@ -36,16 +36,9 @@ EXTRACT_PARAMS = {
     'hog_feat': True
 }
 
-# Some windowing params
-# NOTE: these must be very carefully selected! The start parameters in both directions must be exact multiples of
-# NOTE: scale * EXTRACT_PARAMS['pix_per_cell'] for the lookup from global single-pass hog matrix to make any sense.
-# NOTE: Otherwise there will be a shift in the values that makes any feature vector comparisons and hence also
-# NOTE: classifications meaningless. For stop parameters, this is not so important though.
-_Y_STARTS_STOPS_PER_SCALE = {1: [400, 592], 1.5: [396, 592], 2: [384, 672], 2.5: [400, 680], 3: [400, None]}
-_X_STARTS_STOPS_PER_SCALE = {1: [536, 744], 1.5: [384, 900], 2: [160, 1112], 2.5: [None, None], 3: [None, None]}
-_XY_WINDOW = (64, 64)
-_XY_OVERLAP = (0.75, 0.75)
-_SCALES = (1, 1.5, 2, 2.5)  # (1, 1.5, 2, 2.5)
+_DEFAULT_Y_STARTS_STOPS_PER_SCALE = {1: [400, 592], 1.5: [396, 592], 2: [384, 672], 2.5: [400, 680], 3: [400, None]}
+_DEFAULT_X_STARTS_STOPS_PER_SCALE = {1: [536, 744], 1.5: [384, 900], 2: [160, 1112], 2.5: [None, None], 3: [None, None]}
+_DEFAUT_SCALES = (1, 1.5, 2, 2.5)
 
 
 def detect_vehicles(input_video_path=PROJECT_VIDEO_PATH, output_path=_PROJECT_OUTPUT_PATH,
@@ -62,9 +55,6 @@ def detect_vehicles(input_video_path=PROJECT_VIDEO_PATH, output_path=_PROJECT_OU
     :return: Nothing."""
 
     clip = VideoFileClip(input_video_path)
-    container_for_detections = None  # FIXME instantiate something for every detected vehicle and keep them in this
-                                     # FIXME container, updating some values to track the vehicle (and also
-                                     # FIXME discard apparent spurious detections
     if classifier_training_data is not None:
         assert isinstance(classifier_training_data, dict)
         training_data_params = [
@@ -79,36 +69,12 @@ def detect_vehicles(input_video_path=PROJECT_VIDEO_PATH, output_path=_PROJECT_OU
                                           extract_features_dict=EXTRACT_PARAMS)
     classifier = classifier_and_score['classifier']
     scaler = classifier_and_score['scaler']
-    transformed_clip = clip.fl_image(lambda image: _process_image(image, classifier, scaler, container_for_detections))
+    transformed_clip = clip.fl_image(lambda image: _search_for_cars(image, classifier, scaler))
     transformed_clip.write_videofile(output_path, audio=False)
 
 
-def _process_image(image, classifier, scaler, fixme_container_of_previous_detections_or_whatever):
-    """Augments the image with superimposed vehicle detection results. This function orchestrates most of the heavy 
-    lifting to detect lane lines. The steps performed to achieve this result are: 
-       - FIXME Preprocess the images as follows: 
-       - FIXME Perform the moving window search with multiple scales (... or whatever) to detect vehicles
-       - FIXME Add the raw detections to ... (some data structures used for tracking the vehicles across frames)
-       - FIXME Perform (... some analysis in the data structure classes to filter out outliers, find the 
-               trajectories of vehicles... or whatever)
-       - FIXME After the previous filtering step, draw the bounding boxes around the reliable detections and 
-               superimpose them on the original image
-         
-    :param image: A rbg image. Use distortion corrected images. 
-    :param fixme_container_of_previous_detections_or_whatever: Whatever. Something that contains info on the previous
-           detections
-    :return: an rgb image containing the detection visualizations"""
-
-    # TODO: there is currently a redundant wrapper, get rid of it
-
-    # Use the default params specified at the start of the file
-
-    return _search_for_cars(image, classifier, scaler)
-
-
-def _search_for_cars(raw_image, classifier, scaler, scales=_SCALES,
-                     y_starts_stops=_Y_STARTS_STOPS_PER_SCALE, x_starts_stops=_X_STARTS_STOPS_PER_SCALE,
-                     xy_window=_XY_WINDOW, xy_overlap=_XY_OVERLAP,
+def _search_for_cars(raw_image, classifier, scaler, scales=_DEFAUT_SCALES,
+                     y_starts_stops=_DEFAULT_Y_STARTS_STOPS_PER_SCALE, x_starts_stops=_DEFAULT_X_STARTS_STOPS_PER_SCALE,
                      extract_params=deepcopy(EXTRACT_PARAMS)):
     """Using a moving windows method at different scales, traverses the image and looks for vehicle detections.
     Returns an image with boxes drawn around detected vehicles.
