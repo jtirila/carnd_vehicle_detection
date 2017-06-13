@@ -47,20 +47,20 @@ def extract_prediction_features(ctrans_tosearch, X_scaler, **params):
     hist_feat = extract_params['hist_feat']
     hog_feat = extract_params['hog_feat']
 
-    if global_hog_features.keys() == ['hog']:
-        hog = global_hog_features['hog']
-        hog0 = hog1 = hog2 = None
-    else:
-        assert HOG_PARAMS_KEYS == set(global_hog_features.keys())
-        hog0 = global_hog_features['hog0']
-        hog1 = global_hog_features['hog1']
-        hog2 = global_hog_features['hog2']
-        hog = None
-
-
-
     features = []
     if extract_params['hog_feat']:
+        if set(global_hog_features.keys()) == {'hog'}:
+            hog = global_hog_features['hog']
+            hog0 = hog1 = hog2 = None
+        else:
+            assert HOG_PARAMS_KEYS == set(global_hog_features.keys())
+            hog0 = global_hog_features['hog0']
+            hog1 = global_hog_features['hog1']
+            hog2 = global_hog_features['hog2']
+            hog = None
+
+
+
         if extract_params['hog_channel'] == "ALL":
             hog_feat0 = hog0[ypos:ypos + nblocks_per_window, xpos:xpos + nblocks_per_window].ravel()
             hog_feat1 = hog1[ypos:ypos + nblocks_per_window, xpos:xpos + nblocks_per_window].ravel()
@@ -116,20 +116,17 @@ def single_img_features(img, color_space='RGB', spatial_size=(32, 32), hist_bins
 
     # 7) Compute HOG features if flag is set
     if hog_feat:
-        if img_hog_features is not None:
-            img_features.append(np.ravel(img_hog_features))
+        hog_features = []
+        if hog_channel == "ALL":
+            for channel in range(img_copy.shape[2]):
+                hog_features.append(
+                    get_hog_features(img_copy[:, :, channel], orient, pix_per_cell,
+                                     cell_per_block, vis=False, feature_vec=False)
+                )
         else:
-            hog_features = []
-            if hog_channel == "ALL":
-                for channel in range(img_copy.shape[2]):
-                    hog_features.append(
-                        get_hog_features(img_copy[:, :, channel], orient, pix_per_cell,
-                                         cell_per_block, vis=False, feature_vec=False)
-                    )
-            else:
-                hog_features = get_hog_features(img_copy[:, :, hog_channel], orient, pix_per_cell,
-                                                cell_per_block, vis=False, feature_vec=False)
-            img_features.append(np.ravel(hog_features))
+            hog_features = get_hog_features(img_copy[:, :, hog_channel], orient, pix_per_cell,
+                                            cell_per_block, vis=False, feature_vec=False)
+        img_features.append(np.ravel(hog_features))
 
     # 3) Compute spatial features if flag is set
 

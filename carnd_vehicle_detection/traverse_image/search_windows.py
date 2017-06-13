@@ -1,5 +1,6 @@
 import numpy as np
 import cv2
+import matplotlib.pyplot as plt
 from carnd_vehicle_detection.preprocess import single_img_features, get_hog_features, convert_color, \
     extract_global_hog_features, extract_prediction_features
 from carnd_vehicle_detection.traverse_image import all_windows_divisible_by
@@ -49,6 +50,8 @@ def find_cars(img, ystart_stop, xstart_stop, scale, svc, X_scaler, extract_param
                                                           extract_params['pix_per_cell'],
                                                           extract_params['cell_per_block'],
                                                           extract_params['hog_channel'])
+    else:
+        global_hog_features = None
     hot_windows = []
     window_params = {'scale': scale, 'window': window, 'ystart': ystart,
                      'ystop': ystop, 'nblocks_per_window': nblocks_per_window}
@@ -66,8 +69,10 @@ def find_cars(img, ystart_stop, xstart_stop, scale, svc, X_scaler, extract_param
                       'window_params': window_params,
                       'extract_params': extract_params}
             features = extract_prediction_features(ctrans_tosearch, X_scaler, **params)
-            test_features = X_scaler.transform(np.hstack(features).reshape(1, -1))
-            test_prediction = svc.predict(test_features)
+            # test_features = X_scaler.transform(np.hstack(features).reshape(1, -1))
+            # plt.plot(list(range(len(features.T))), features.T)
+            # plt.show()
+            test_prediction = svc.predict(features)
 
             if test_prediction == 1:
                 xbox_left = np.int(xleft * scale)
