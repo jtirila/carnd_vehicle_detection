@@ -14,8 +14,8 @@ from carnd_vehicle_detection.utils.find_cars import find_cars
 from carnd_vehicle_detection.visualize import draw_labeled_bboxes
 
 # PROJECT_VIDEO_PATH = os.path.join(ROOT_DIR, 'project_video.mp4')
-PROJECT_VIDEO_PATH = os.path.join(ROOT_DIR, 'unit_tests', 'test_videos', 'subclip_0__15.mp4')
-# PROJECT_VIDEO_PATH = os.path.join(ROOT_DIR, 'unit_tests', 'test_videos', 'subclip_15__20.mp4')
+# PROJECT_VIDEO_PATH = os.path.join(ROOT_DIR, 'unit_tests', 'test_videos', 'subclip_0__15.mp4')
+PROJECT_VIDEO_PATH = os.path.join(ROOT_DIR, 'unit_tests', 'test_videos', 'subclip_15__20.mp4')
 # PROJECT_VIDEO_PATH = os.path.join(ROOT_DIR, 'unit_tests', 'test_videos', 'subclip_35__36.mp4')
 
 _PROJECT_OUTPUT_PATH = os.path.join(ROOT_DIR, 'transformed.mp4')
@@ -30,8 +30,8 @@ EXTRACT_PARAMS = {
     'hog_channel': "ALL",
     'spatial_size': (32, 32),
     'hist_bins': 32,
-    'spatial_feat': False,
-    'hist_feat': False,
+    'spatial_feat': True,
+    'hist_feat': True,
     'hog_feat': True
 }
 
@@ -138,12 +138,12 @@ def _search_for_cars(raw_image, classifier, scaler, scales=_SCALES,
     heat = np.zeros_like(image[:, :, 0]).astype(np.float)
     heat = add_heat(heat, hot_windows)
     heatmap = np.clip(heat, 0, 255)
-    heatmap = apply_threshold(heatmap, 2)
+    heatmap = apply_threshold(heatmap, 4)
     labels = label(heatmap)
     return draw_labeled_bboxes(np.copy(image), labels)
 
 
 if __name__ == "__main__":
-    detect_vehicles(previous_classifier_path=_DEFAULT_CLASSIFIER_PATH)
-    # detect_vehicles(previous_classifier_path=None)
+    # detect_vehicles(previous_classifier_path=_DEFAULT_CLASSIFIER_PATH)
+    detect_vehicles(previous_classifier_path=None)
 

@@ -29,18 +29,6 @@ def single_img_features(img, color_space='RGB', spatial_size=(32, 32), hist_bins
     # 2) Convert color space (if specified as other than RGB)
     img_copy = convert_color(img, color_space)
 
-    # 3) Compute spatial features if flag is set
-    if spatial_feat:
-        spatial_features = bin_spatial(img_copy, size=spatial_size)
-        # 4) Append features to list
-        img_features.append(spatial_features)
-
-    # 5) Compute histogram features if flag is set
-    if hist_feat:
-        hist_features = color_hist(img_copy, nbins=hist_bins, bins_range=bins_range)
-        # 6) Append features to list
-        img_features.append(hist_features)
-
     # 7) Compute HOG features if flag is set
     if hog_feat:
         if img_hog_features is not None:
@@ -57,6 +45,20 @@ def single_img_features(img, color_space='RGB', spatial_size=(32, 32), hist_bins
                 hog_features = get_hog_features(img_copy[:, :, hog_channel], orient, pix_per_cell,
                                                 cell_per_block, vis=False, feature_vec=False)
             img_features.append(np.ravel(hog_features))
+
+    # 3) Compute spatial features if flag is set
+
+    if spatial_feat:
+        spatial_features = bin_spatial(img_copy, size=spatial_size)
+        # 4) Append features to list
+        img_features.append(spatial_features)
+
+    # 5) Compute histogram features if flag is set
+    if hist_feat:
+        hist_features = color_hist(img_copy, nbins=hist_bins, bins_range=bins_range)
+        # 6) Append features to list
+        img_features.append(hist_features)
+
 
     # 9) Return concatenated array of features
     return np.concatenate(img_features)
