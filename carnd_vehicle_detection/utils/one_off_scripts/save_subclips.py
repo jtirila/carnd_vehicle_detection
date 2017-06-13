@@ -16,10 +16,12 @@ def save_subclips(video_path=PROJECT_VIDEO_PATH):
         subclip.write_videofile(os.path.join(SUBCLIP_OUTPUT_DIRECTORY, 'subclip_{}__{}.mp4'.format(start, start + 5)),
                                 audio=False)
 
-    # Save also one longer piece
+    # Save also a couple of longer pieces
     subclip = clip.subclip(0, 15)
     subclip.write_videofile(os.path.join(SUBCLIP_OUTPUT_DIRECTORY, 'subclip_0__15.mp4'), audio=False)
 
+    subclip = clip.subclip(15, 30)
+    subclip.write_videofile(os.path.join(SUBCLIP_OUTPUT_DIRECTORY, 'subclip_15__30.mp4'), audio=False)
 
 if __name__ == "__main__":
     save_subclips()

@@ -1,5 +1,77 @@
 import numpy as np
 from carnd_vehicle_detection.preprocess import get_hog_features, color_hist, bin_spatial, convert_color
+import cv2
+
+WINDOWS_PARAMS_KEYS = {'nblocks_per_window', 'window', 'ypos', 'xpos', 'ystart', 'ystop', 'scale', 'xleft', 'ytop'}
+HOG_PARAMS_KEYS = {'hog0', 'hog1', 'hog2'}
+EXTRACT_PARAMS_KEYS = {'color_space', 'orient', 'pix_per_cell', 'cell_per_block', 'hog_channel',
+                       'spatial_size', 'hist_bins', 'spatial_feat', 'hist_feat', 'hog_feat'}
+
+
+def extract_prediction_features(ctrans_tosearch, X_scaler,
+                                **global_hog_features, **window_params, **extract_params):
+
+    assert WINDOWS_PARAMS_KEYS  == set(window_params.keys())
+    nblocks_per_window = window_params['nblocks_per_window']
+    window = window_params['window']
+    ypos = window_params['ypos']
+    xpos = window_params['xpos']
+    ystart = window_params['ystart']
+    ystop = window_params['ystop']
+    xleft = window_params['xleft']
+    ytop = window_params['ytop']
+
+    assert EXTRACT_PARAMS_KEYS == set(extract_params.keys())
+
+    color_space = extract_params['color_space']
+    orient = extract_params['orient']
+    pix_per_cell = extract_params['pix_per_cell']
+    cell_per_block = extract_params['cell_per_block']
+    hog_channel = extract_params['hog_channel']
+    spatial_size = extract_params['spatial_size']
+    hist_bins = extract_params['hist_bins']
+    spatial_feat = extract_params['spatial_feat']
+    hist_feat = extract_params['hist_feat']
+    hog_feat = extract_params['hog_feat']
+
+    if global_hog_features.keys() == ['hog']:
+        hog = global_hog_features['hog']
+        hog0 = hog1 = hog2 = None
+    else:
+        assert HOG_PARAMS_KEYS == set(global_hog_features.keys())
+        hog0 = global_hog_features['hog0']
+        hog1 = global_hog_features['hog1']
+        hog2 = global_hog_features['hog2']
+        hog = None
+
+
+
+    features = []
+    if hog_feat:
+        if hog_channel == "ALL":
+            hog_feat0 = hog0[ypos:ypos + nblocks_per_window, xpos:xpos + nblocks_per_window].ravel()
+            hog_feat1 = hog1[ypos:ypos + nblocks_per_window, xpos:xpos + nblocks_per_window].ravel()
+            hog_feat2 = hog2[ypos:ypos + nblocks_per_window, xpos:xpos + nblocks_per_window].ravel()
+            hog_features = np.hstack((hog_feat0, hog_feat1, hog_feat2))
+        else:
+            hog_features = hog[ypos:ypos + nblocks_per_window, xpos:xpos + nblocks_per_window].ravel()
+        features.append(hog_features)
+
+
+    # Extract the image patch
+    subimg = cv2.resize(ctrans_tosearch[ytop:ytop + window, xleft:xleft + window], (64, 64))
+
+    if spatial_feat:
+        # Get color features
+        spatial_features = bin_spatial(subimg, size=spatial_size)
+        features.append(spatial_features)
+    if hist_feat:
+        hist_features = color_hist(subimg, nbins=hist_bins)
+        features.append(hist_features)
+
+    # Scale features and make a prediction
+    test_features = X_scaler.transform(np.hstack(features).reshape(1, -1))
+    return test_features
 
 
 def single_img_features(img, color_space='RGB', spatial_size=(32, 32), hist_bins=32, bins_range=(0, 256),

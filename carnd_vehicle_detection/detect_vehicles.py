@@ -15,7 +15,8 @@ from carnd_vehicle_detection.visualize import draw_labeled_bboxes
 
 # PROJECT_VIDEO_PATH = os.path.join(ROOT_DIR, 'project_video.mp4')
 # PROJECT_VIDEO_PATH = os.path.join(ROOT_DIR, 'unit_tests', 'test_videos', 'subclip_0__15.mp4')
-PROJECT_VIDEO_PATH = os.path.join(ROOT_DIR, 'unit_tests', 'test_videos', 'subclip_15__20.mp4')
+# PROJECT_VIDEO_PATH = os.path.join(ROOT_DIR, 'unit_tests', 'test_videos', 'subclip_15__20.mp4')
+PROJECT_VIDEO_PATH = os.path.join(ROOT_DIR, 'unit_tests', 'test_videos', 'subclip_15__30.mp4')
 # PROJECT_VIDEO_PATH = os.path.join(ROOT_DIR, 'unit_tests', 'test_videos', 'subclip_35__36.mp4')
 
 _PROJECT_OUTPUT_PATH = os.path.join(ROOT_DIR, 'transformed.mp4')
@@ -24,7 +25,7 @@ _DEFAULT_CLASSIFIER_PATH = os.path.join(ROOT_DIR, 'classifier.p')
 
 EXTRACT_PARAMS = {
     'color_space': 'HLS',
-    'orient': 9,
+    'orient': 7,
     'pix_per_cell': 8,
     'cell_per_block': 2,
     'hog_channel': "ALL",
@@ -125,14 +126,13 @@ def _search_for_cars(raw_image, classifier, scaler, scales=_SCALES,
     :param extract_params: A dict with all the parameters one wishes to set for extract_features, see its 
            documentation for what is available"""
 
-    window_image = np.copy(raw_image)
-    image = normalize_luminosity(window_image)
+    image = normalize_luminosity(raw_image)
 
     hot_windows = []
     for scale in scales:
         y_start_stop, x_start_stop = y_starts_stops[scale], x_starts_stops[scale]
         hot_windows.extend(
-            find_cars(image, y_start_stop[0], y_start_stop[1], scale, classifier, scaler, **extract_params)
+            find_cars(image, y_start_stop[0], y_start_stop[1], scale, classifier, scaler, extract_params)
         )
 
     heat = np.zeros_like(image[:, :, 0]).astype(np.float)
@@ -140,7 +140,7 @@ def _search_for_cars(raw_image, classifier, scaler, scales=_SCALES,
     heatmap = np.clip(heat, 0, 255)
     heatmap = apply_threshold(heatmap, 4)
     labels = label(heatmap)
-    return draw_labeled_bboxes(np.copy(image), labels)
+    return draw_labeled_bboxes(raw_image, labels)
 
 
 if __name__ == "__main__":
