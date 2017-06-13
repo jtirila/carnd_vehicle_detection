@@ -8,10 +8,13 @@ EXTRACT_PARAMS_KEYS = {'color_space', 'orient', 'pix_per_cell', 'cell_per_block'
                        'spatial_size', 'hist_bins', 'spatial_feat', 'hist_feat', 'hog_feat'}
 
 
-def extract_prediction_features(ctrans_tosearch, X_scaler,
-                                **global_hog_features, **window_params, **extract_params):
+def extract_prediction_features(ctrans_tosearch, X_scaler, **params):
 
-    assert WINDOWS_PARAMS_KEYS  == set(window_params.keys())
+    global_hog_features = params['global_hog_features']
+    window_params = params['window_params']
+    extract_params = params['extract_params']
+
+    assert WINDOWS_PARAMS_KEYS == set(window_params.keys())
     nblocks_per_window = window_params['nblocks_per_window']
     window = window_params['window']
     ypos = window_params['ypos']
@@ -47,8 +50,8 @@ def extract_prediction_features(ctrans_tosearch, X_scaler,
 
 
     features = []
-    if hog_feat:
-        if hog_channel == "ALL":
+    if extract_params['hog_feat']:
+        if extract_params['hog_channel'] == "ALL":
             hog_feat0 = hog0[ypos:ypos + nblocks_per_window, xpos:xpos + nblocks_per_window].ravel()
             hog_feat1 = hog1[ypos:ypos + nblocks_per_window, xpos:xpos + nblocks_per_window].ravel()
             hog_feat2 = hog2[ypos:ypos + nblocks_per_window, xpos:xpos + nblocks_per_window].ravel()

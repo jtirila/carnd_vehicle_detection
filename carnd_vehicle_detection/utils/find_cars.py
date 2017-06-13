@@ -66,9 +66,11 @@ def find_cars(img, ystart, ystop, scale, svc, X_scaler, extract_params):
 
             xleft, ytop = xpos * pix_per_cell, ypos * extract_params['pix_per_cell']
             window_params = {'xpos': xpos, 'scale': scale, 'ypos': ypos,
-                             'window': window, 'ystart': ystart, 'ystop': ystop, 'xleft': xleft, 'ytop': ytop}
-            features = extract_prediction_features(ctrans_tosearch, X_scaler, **global_hog_features,
-                                                   **window_params, **extract_params)
+                             'window': window, 'ystart': ystart, 'ystop': ystop, 'xleft': xleft, 'ytop': ytop,
+                             'nblocks_per_window': nblocks_per_window}
+            params = {'global_hog_features': global_hog_features, 'window_params': window_params,
+                      'extract_params': extract_params}
+            features = extract_prediction_features(ctrans_tosearch, X_scaler, **params)
             test_features = X_scaler.transform(np.hstack(features).reshape(1, -1))
             test_prediction = svc.predict(test_features)
 
