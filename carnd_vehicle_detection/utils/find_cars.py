@@ -31,7 +31,7 @@ def find_cars(img, ystart, ystop, scale, svc, X_scaler, extract_params):
     # 64 was the original sampling rate, with 8 cells and 8 pix per cell
     window = 64
     nblocks_per_window = (window // extract_params['pix_per_cell']) - extract_params['cell_per_block'] + 1
-    cells_per_step = 2  # Instead of overlap, define how many cells to step
+    cells_per_step = 1  # Instead of overlap, define how many cells to step
     nxsteps = (nxblocks - nblocks_per_window) // cells_per_step
     nysteps = (nyblocks - nblocks_per_window) // cells_per_step
 
@@ -39,7 +39,8 @@ def find_cars(img, ystart, ystop, scale, svc, X_scaler, extract_params):
     if extract_params['hog_feat']:
 
         global_hog_features = extract_global_hog_features(channels_dict, extract_params['orient'],
-                                                         extract_params['pix_per_cell'], extract_params['cell_per_block'],
+                                                         extract_params['pix_per_cell'],
+                                                         extract_params['cell_per_block'],
                                                          extract_params['hog_channel'])
     hot_windows = []
     window_params = {'scale': scale, 'window': window, 'ystart': ystart,

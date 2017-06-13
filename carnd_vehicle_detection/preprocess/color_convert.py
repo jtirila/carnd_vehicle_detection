@@ -30,4 +30,4 @@ def normalize_luminosity(img):
     img_yuv[:, :, 0] = cv2.equalizeHist(img_yuv[:, :, 0])
 
     # convert the YUV image back to RGB format
-    return cv2.cvtColor(img_yuv, cv2.COLOR_YUV2BGR)
+    return cv2.cvtColor(img_yuv, cv2.COLOR_YUV2RGB)

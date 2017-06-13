@@ -5,7 +5,7 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.svm import LinearSVC
 
 from carnd_vehicle_detection import ROOT_DIR
-from carnd_vehicle_detection.preprocess import single_img_features, read_training_data
+from carnd_vehicle_detection.preprocess import single_img_features, read_training_data, normalize_luminosity
 
 DEFAULT_CLASSIFIER_SAVE_PATH = os.path.join(ROOT_DIR, 'svm_classifier.p')
 
@@ -40,8 +40,10 @@ def get_classifier(classifier_path=None, classifier_save_path=DEFAULT_CLASSIFIER
     else:
         if None in (features_train, labels_train, features_valid, labels_valid):
             features_train, features_valid, labels_train, labels_valid = read_training_data()
-        extracted_features_train = [single_img_features(img, **extract_features_dict) for img in features_train]
-        extracted_features_valid = [single_img_features(img, **extract_features_dict) for img in features_valid]
+        extracted_features_train = [single_img_features(normalize_luminosity(img), **extract_features_dict)
+                                    for img in features_train]
+        extracted_features_valid = [single_img_features(normalize_luminosity(img), **extract_features_dict)
+                                    for img in features_valid]
         scaler = StandardScaler()
         scaler.fit(extracted_features_train)
         scaled_features_train = scaler.transform(extracted_features_train)
