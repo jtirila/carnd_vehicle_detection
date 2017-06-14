@@ -131,13 +131,17 @@ rubric points.
 ### Overview of my solution in terms of the rubric points 
 
 
+
 #### First point
 
 #### Data preprocessing
 
 #### Feature extraction
+
 ##### FIXME: some color histogram stuff maybe
-##### Extracting the HOG features
+##### Extracting the HOG features, the first attempt
+
+FIXME: describe what was attempted
 
 ###### The Relationship Between Moving Windows and HOG Features
 
@@ -202,15 +206,21 @@ I initially experimented with extracting the
 Due to various 
 
 
+##### Extracting the HOG features, reboot 
 
-#### The moving window search
+FIXME: describe the other approach with resizing the window according to scale and proceeding from there 
 
-#### Tracking vehicles and removing false positives
+##### The histogram and spatial features
+
+#### Training the classifier
+
+
+#### ETC
+#### The moving window search, tracking vehicles and removing false positives
 
 TODO: These are covered in one section because the technique to implement these two things 
 is higly overlapping.
-#### Training the classifier
-#### ETC
+
 
 
 ### The solution
