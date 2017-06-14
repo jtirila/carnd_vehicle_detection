@@ -6,7 +6,7 @@ def add_labeled_heatmap(image, hot_windows):
     heat = np.zeros_like(image[:, :, 0]).astype(np.float)
     heat = _add_heat(heat, hot_windows)
     heatmap = np.clip(heat, 0, 255)
-    heatmap = _apply_threshold(heatmap, 1)
+    heatmap = _apply_threshold(heatmap, 3)
     labels = label(heatmap)
     return labels
 

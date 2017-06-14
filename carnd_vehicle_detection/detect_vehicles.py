@@ -1,5 +1,7 @@
 import os
 from copy import deepcopy
+import matplotlib.image as mpimg
+import matplotlib.pyplot as plt
 
 import numpy as np
 from moviepy.editor import VideoFileClip
@@ -11,14 +13,14 @@ from carnd_vehicle_detection.mask import add_labeled_heatmap
 from carnd_vehicle_detection.preprocess import normalize_luminosity
 # This is the default video to read as input.
 from carnd_vehicle_detection.traverse_image import find_cars
-from carnd_vehicle_detection.utils.find_cars import find_cars as fc
+from carnd_vehicle_detection.utils import fc
 from carnd_vehicle_detection.visualize import draw_labeled_bboxes
 
-# PROJECT_VIDEO_PATH = os.path.join(ROOT_DIR, 'project_video.mp4')
+PROJECT_VIDEO_PATH = os.path.join(ROOT_DIR, 'project_video.mp4')
 # PROJECT_VIDEO_PATH = os.path.join(ROOT_DIR, 'unit_tests', 'test_videos', 'subclip_0__15.mp4')
 # PROJECT_VIDEO_PATH = os.path.join(ROOT_DIR, 'unit_tests', 'test_videos', 'subclip_15__20.mp4')
 # PROJECT_VIDEO_PATH = os.path.join(ROOT_DIR, 'unit_tests', 'test_videos', 'subclip_15__30.mp4')
-PROJECT_VIDEO_PATH = os.path.join(ROOT_DIR, 'unit_tests', 'test_videos', 'subclip_35__36.mp4')
+# PROJECT_VIDEO_PATH = os.path.join(ROOT_DIR, 'unit_tests', 'test_videos', 'subclip_35__36.mp4')
 # PROJECT_VIDEO_PATH = os.path.join(ROOT_DIR, 'unit_tests', 'test_videos', 'subclip_35__35_3.mp4')
 
 _PROJECT_OUTPUT_PATH = os.path.join(ROOT_DIR, 'transformed.mp4')
@@ -31,8 +33,8 @@ EXTRACT_PARAMS = {
     'pix_per_cell': 8,
     'cell_per_block': 2,
     'hog_channel': "ALL",
-    'spatial_size': (32, 32),
-    'hist_bins': 32,
+    'spatial_size': (16, 16),
+    'hist_bins': 24,
     'spatial_feat': True,
     'hist_feat': True,
     'hog_feat': True
@@ -47,14 +49,14 @@ _DEFAULT_Y_STARTS_STOPS_PER_SCALE = {
     2.5: [380, 690],
     3: [380, 690]}
 _DEFAULT_X_STARTS_STOPS_PER_SCALE = {
-    0.5: [600, 1080],
-    1: [700, 1140],
-    1.5: [600, 1100],
-    2: [400, None],
-    2.2: [400, None],
+    0.5: [300, 980],
+    1: [300, 980],
+    1.5: [100, 1180],
+    2: [None, None],
+    2.2: [None, None],
     2.5: [300, None],
     3: [300, None]}
-_DEFAULT_SCALES = (1, 1.5, 2, 2.2, 2.5, 3)
+_DEFAULT_SCALES = (0.5, 1, 1.5, 2.2, 2.5, 3)
 
 
 def detect_vehicles(input_video_path=PROJECT_VIDEO_PATH, output_path=_PROJECT_OUTPUT_PATH,
@@ -108,19 +110,26 @@ def search_for_cars(raw_image, classifier, scaler, scales=_DEFAULT_SCALES,
     :param extract_params: A dict with all the parameters one wishes to set for extract_features, see its 
            documentation for what is available"""
 
+    draw_img = np.copy(raw_image)
+    # plt.imshow(raw_image)
+    # plt.show()
     image = normalize_luminosity(raw_image)
+    # plt.imshow(image)
+    # plt.show()
+
 
     hot_windows = []
     for scale in scales:
         y_start_stop, x_start_stop = y_starts_stops[scale], x_starts_stops[scale]
         hot_windows.extend(
+            # find_cars(image, y_start_stop, y_start_stop, scale, classifier, scaler, extract_params)
             fc(image, *y_start_stop, *x_start_stop, scale, classifier, scaler, **extract_params)
         )
     labels = add_labeled_heatmap(image, hot_windows)
-    return draw_labeled_bboxes(raw_image, labels)
+    return draw_labeled_bboxes(draw_img, labels)
 
 
 if __name__ == "__main__":
-    detect_vehicles(previous_classifier_path=_DEFAULT_CLASSIFIER_PATH)
-    # detect_vehicles(previous_classifier_path=None)
+    # detect_vehicles(previous_classifier_path=_DEFAULT_CLASSIFIER_PATH)
+    detect_vehicles(previous_classifier_path=None)
 

@@ -1,5 +1,6 @@
 import numpy as np
 from carnd_vehicle_detection.preprocess import get_hog_features, color_hist, bin_spatial, convert_color
+import matplotlib.pyplot as plt
 import cv2
 
 WINDOWS_PARAMS_KEYS = {'nblocks_per_window', 'window', 'ypos', 'xpos', 'ystart', 'ystop', 'scale', 'xleft', 'ytop'}

@@ -42,8 +42,10 @@ the Python code.
 **When mentioning code file paths in this writeup, the root of reference is always the innermost 
 `carnd_vehicle_detection` directory.**
 
-
-
+It should be noted that I was a little bit too ambitious about the project structure, and the attempt to 
+basically restructure everything ended up taking several days of debugging and refactoring, only to finally 
+basically come back to something rather close to the example code. Anyhow, it was a nice learning experience 
+both in computer vision/machine learning and managing complexity in a software project. 
 
 
 #### Unit tests
@@ -65,9 +67,57 @@ functionality resides outside of the test directory.**
 
 #### Prerequisities
 
+##### Training images
+
+You will need a set of both vehicle and non-vehicle images to train the classifier. These images are 
+not included in the repository. The easiest way is to place the images as follows, relative to the 
+top level of the repository. 
+
+```
+├── images 
+│   ├── vehicles 
+│   │   └── first_subdirectory 
+│   │      └── first_image.png 
+│   │      └── second_image.png 
+│   │   └── second_subdirectory 
+│   │      └── first_image.png 
+│   │      └── second_image.png 
+│   ├── nonvehicles 
+│   │   └── first_subdirectory 
+│   │      └── first_image.png 
+│   │      └── second_image.png 
+│   │   └── second_subdirectory 
+│   │      └── first_image.png 
+│   │      └── second_image.png 
+```
+
+However, the `classify/svm_classifier.py` file documents how to provide 
+the training data directly from python. 
+
+##### Project video
+
+You will also need a video to process. The easiest way to proceed is just to place 
+a video file called `project_video.mp4` in the top level directory. However, if several 
+videos are needed or a different name is desirable, the `detect_vehicles.py` file documents 
+a way to pass a file of different name to the processing pipeline. 
+
+##### Runtime environment and packages
+
+FIXME: starter pack or just collect everything manually
+
 #### Running as a script
 
+The easiest way is to follow the prerequisities as suggested, and then running 
+```
+python detect_vehicles.py
+```
+
 #### Importing, then running
+
+```
+from carnd_vehicle_detection import detect_vehicles
+detect_vehicles(FIXME)
+```
 
 ## The project 
 

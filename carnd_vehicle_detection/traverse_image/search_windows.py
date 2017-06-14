@@ -16,7 +16,7 @@ def find_cars(img, ystart_stop, xstart_stop, scale, svc, X_scaler, extract_param
     ystop = img.shape[0] if ystop is None else xstop
 
     work_img = np.copy(img)
-    work_img = work_img.astype(np.float32) / 255
+    work_img = work_img.astype(np.float32)
 
     img_tosearch = work_img[ystart:ystop, xstart:xstop, :]
     ctrans_tosearch = convert_color(img_tosearch, conv=extract_params['color_space'])

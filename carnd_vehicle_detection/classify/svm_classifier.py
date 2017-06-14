@@ -49,8 +49,8 @@ def get_classifier(classifier_path=None, classifier_save_path=DEFAULT_CLASSIFIER
         scaler = StandardScaler()
         scaler.fit(extracted_features_train)
         scaled_features_train = scaler.transform(extracted_features_train)
-        plt.plot(list(range(len(scaled_features_train[0]))), scaled_features_train[0])
-        plt.show()
+        # plt.plot(list(range(len(scaled_features_train[0]))), scaled_features_train[0])
+        # plt.show()
         scaled_features_valid = scaler.transform(extracted_features_valid)
 
         classifier, score = train_classifier(scaled_features_train, labels_train, scaled_features_valid, labels_valid)
