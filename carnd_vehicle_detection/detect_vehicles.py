@@ -28,35 +28,35 @@ _DEFAULT_CLASSIFIER_PATH = os.path.join(ROOT_DIR, 'classifier.p')
 
 
 EXTRACT_PARAMS = {
-    'color_space': 'LUV',
+    'color_space': 'YCrCb',
     'orient': 9,
     'pix_per_cell': 8,
     'cell_per_block': 2,
     'hog_channel': "ALL",
-    'spatial_size': (16, 16),
-    'hist_bins': 24,
+    'spatial_size': (32, 32),
+    'hist_bins': 32,
     'spatial_feat': True,
     'hist_feat': True,
     'hog_feat': True
 }
 
 _DEFAULT_Y_STARTS_STOPS_PER_SCALE = {
-    0.5: [410, 450],
-    1: [380, 530],
-    1.5: [380, 690],
-    2: [380, 690],
-    2.2: [380, 690],
-    2.5: [380, 690],
-    3: [380, 690]}
+    0.5: [420, 600],
+    1: [420, 600],
+    1.5: [370, 690],
+    2: [370, 690],
+    2.2: [370, 690],
+    2.5: [370, 690],
+    3: [370, 690]}
 _DEFAULT_X_STARTS_STOPS_PER_SCALE = {
     0.5: [300, 980],
     1: [300, 980],
-    1.5: [100, 1180],
+    1.5: [None, None],
     2: [None, None],
     2.2: [None, None],
     2.5: [300, None],
     3: [300, None]}
-_DEFAULT_SCALES = (0.5, 1, 1.5, 2.2, 2.5, 3)
+_DEFAULT_SCALES = (0.5, 1, 1.5, 2, 2.2, 2.5, 3)
 
 
 def detect_vehicles(input_video_path=PROJECT_VIDEO_PATH, output_path=_PROJECT_OUTPUT_PATH,
@@ -130,6 +130,6 @@ def search_for_cars(raw_image, classifier, scaler, scales=_DEFAULT_SCALES,
 
 
 if __name__ == "__main__":
-    # detect_vehicles(previous_classifier_path=_DEFAULT_CLASSIFIER_PATH)
-    detect_vehicles(previous_classifier_path=None)
+    detect_vehicles(previous_classifier_path=_DEFAULT_CLASSIFIER_PATH)
+    # detect_vehicles(previous_classifier_path=None)
 
