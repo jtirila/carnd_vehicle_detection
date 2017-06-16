@@ -20,7 +20,8 @@ from carnd_vehicle_detection.visualize import draw_labeled_bboxes
 # PROJECT_VIDEO_PATH = os.path.join(ROOT_DIR, 'project_video.mp4')
 # PROJECT_VIDEO_PATH = os.path.join(ROOT_DIR, 'unit_tests', 'test_videos', 'subclip_0__15.mp4')
 # PROJECT_VIDEO_PATH = os.path.join(ROOT_DIR, 'unit_tests', 'test_videos', 'subclip_15__20.mp4')
-PROJECT_VIDEO_PATH = os.path.join(ROOT_DIR, 'unit_tests', 'test_videos', 'subclip_20__25.mp4')
+# PROJECT_VIDEO_PATH = os.path.join(ROOT_DIR, 'unit_tests', 'test_videos', 'subclip_20__25.mp4')
+PROJECT_VIDEO_PATH = os.path.join(ROOT_DIR, 'unit_tests', 'test_videos', 'subclip_20__35.mp4')
 # PROJECT_VIDEO_PATH = os.path.join(ROOT_DIR, 'unit_tests', 'test_videos', 'subclip_15__30.mp4')
 # PROJECT_VIDEO_PATH = os.path.join(ROOT_DIR, 'unit_tests', 'test_videos', 'subclip_35__36.mp4')
 # PROJECT_VIDEO_PATH = os.path.join(ROOT_DIR, 'unit_tests', 'test_videos', 'subclip_35__35_3.mp4')
@@ -30,7 +31,7 @@ _DEFAULT_CLASSIFIER_PATH = os.path.join(ROOT_DIR, 'classifier.p')
 
 
 EXTRACT_PARAMS = {
-    'color_space': 'YCrCb',
+    'color_space': 'HLS',
     'orient': 9,
     'pix_per_cell': 8,
     'cell_per_block': 2,
@@ -133,6 +134,6 @@ def search_for_cars(raw_image, classifier, scaler, aggregated_heatmp, scales=_DE
 
 
 if __name__ == "__main__":
-    detect_vehicles(previous_classifier_path=_DEFAULT_CLASSIFIER_PATH)
-    # detect_vehicles(previous_classifier_path=None)
+    # detect_vehicles(previous_classifier_path=_DEFAULT_CLASSIFIER_PATH)
+    detect_vehicles(previous_classifier_path=None)
 
