@@ -12,9 +12,14 @@ def save_subclips(video_path=PROJECT_VIDEO_PATH):
     # subclip.write_videofile(os.path.join(SUBCLIP_OUTPUT_DIRECTORY, 'subclip_35__36.mp4'),
     #                         audio=False)
 
+    # clip = VideoFileClip(video_path)
+    # subclip = clip.subclip(35.0, 35.3)
+    # subclip.write_videofile(os.path.join(SUBCLIP_OUTPUT_DIRECTORY, 'subclip_35__35_3.mp4'),
+    #                         audio=False)
+
     clip = VideoFileClip(video_path)
-    subclip = clip.subclip(35.0, 35.3)
-    subclip.write_videofile(os.path.join(SUBCLIP_OUTPUT_DIRECTORY, 'subclip_35__35_3.mp4'),
+    subclip = clip.subclip(20.0, 25)
+    subclip.write_videofile(os.path.join(SUBCLIP_OUTPUT_DIRECTORY, 'subclip_20__25.mp4'),
                             audio=False)
 
     # for start in (0, 15, 30):

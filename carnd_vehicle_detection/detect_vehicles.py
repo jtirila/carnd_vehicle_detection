@@ -17,9 +17,10 @@ from carnd_vehicle_detection.traverse_image import find_cars
 from carnd_vehicle_detection.utils import fc
 from carnd_vehicle_detection.visualize import draw_labeled_bboxes
 
-PROJECT_VIDEO_PATH = os.path.join(ROOT_DIR, 'project_video.mp4')
+# PROJECT_VIDEO_PATH = os.path.join(ROOT_DIR, 'project_video.mp4')
 # PROJECT_VIDEO_PATH = os.path.join(ROOT_DIR, 'unit_tests', 'test_videos', 'subclip_0__15.mp4')
 # PROJECT_VIDEO_PATH = os.path.join(ROOT_DIR, 'unit_tests', 'test_videos', 'subclip_15__20.mp4')
+PROJECT_VIDEO_PATH = os.path.join(ROOT_DIR, 'unit_tests', 'test_videos', 'subclip_20__25.mp4')
 # PROJECT_VIDEO_PATH = os.path.join(ROOT_DIR, 'unit_tests', 'test_videos', 'subclip_15__30.mp4')
 # PROJECT_VIDEO_PATH = os.path.join(ROOT_DIR, 'unit_tests', 'test_videos', 'subclip_35__36.mp4')
 # PROJECT_VIDEO_PATH = os.path.join(ROOT_DIR, 'unit_tests', 'test_videos', 'subclip_35__35_3.mp4')

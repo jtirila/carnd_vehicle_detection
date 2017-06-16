@@ -67,66 +67,68 @@ functionality resides outside of the test directory.**
 
 #### Prerequisities
 
+* Some Python 3.x version. The project has been written on Python 3.5. I am not aware if compatibility varies between 
+  different minor versions of Python 3. Possibly package dependencies could cause difficulties with some combinations.  
+* All the Python packages needed to run the code, including Numpy, OpenCV and MatPlotLib. 
+  The easisest way to get both Python and the packages up and running is probably to install the 
+  [Udacity started kit](https://github.com/udacity/CarND-Term1-Starter-Kit). 
+* A suitable set of training images to train the vehicle detection classifier. These files will not be included in the 
+  repository. The images have to be placed in the `images` subdirectory of the top level of the 
+  project, with vehicle images place in subdirectories of `vehicle` and non-vehicle images in subdirectories of 
+  `nonvehicle` within the image directory. 
+  
+  Or, alternatively, if you wish to take care of 
+  loading the images yourself, the `classify/svm_classifier.py` file documents how to provide 
+  the training data directly as Python data structures. 
+* The project video is also omitted from this repository. You should find 
+  [the one used for the project](https://github.com/udacity/CarND-Vehicle-Detection/blob/master/project_video.mp4) 
+  or an equivalent video. Probably there are some requirements on the type of video but I don't know them as of now. 
+  
+  By default, there needs to be a video called `project_video.mp4` in the top level directory. 
+  See `detect_vehicles.py` for how you can provide a different filename as a parameter. 
+* You probably also need to have `ffmpeg` installed. Not sure about this. If the processing fails, you 
+  can try installing `ffmpeg`. 
+
+#### Launching the vehicle detector
+
+With the prerequisities covered, you can simply run the vehicle detector script by 
+
+```
+sh detect_vehicles.py
+```
+
+in the directory where the file is located, or by launching the Python interpreter and issuing the following commands. 
+
+```python
+from carnd_vehicle_detection.detect_vehicles import detect_vehicles
+detect_vehicles
+```
+
+This will by default result in a rather long processing pipeline. The package contains utils for creating 
+subclips of the video in the `utils/one_off_scripts` directory and with there are commented-out references to these 
+shorter passages of the video in `detect_vehicles.py`. What exactly to do is currently uncodumented but not too 
+difficult to figure out.  
+To run the code
+
+#### The result
+
+Once the script is done, by default is has produced a video called `transformed.mp4` in the top level directory.
+
 ##### Training images
 
 You will need a set of both vehicle and non-vehicle images to train the classifier. These images are 
 not included in the repository. The easiest way is to place the images as follows, relative to the 
 top level of the repository. 
 
-```
-├── images 
-│   ├── vehicles 
-│   │   └── first_subdirectory 
-│   │      └── first_image.png 
-│   │      └── second_image.png 
-│   │   └── second_subdirectory 
-│   │      └── first_image.png 
-│   │      └── second_image.png 
-│   ├── nonvehicles 
-│   │   └── first_subdirectory 
-│   │      └── first_image.png 
-│   │      └── second_image.png 
-│   │   └── second_subdirectory 
-│   │      └── first_image.png 
-│   │      └── second_image.png 
-```
-
-However, the `classify/svm_classifier.py` file documents how to provide 
-the training data directly from python. 
-
-##### Project video
-
-You will also need a video to process. The easiest way to proceed is just to place 
-a video file called `project_video.mp4` in the top level directory. However, if several 
-videos are needed or a different name is desirable, the `detect_vehicles.py` file documents 
-a way to pass a file of different name to the processing pipeline. 
-
-##### Runtime environment and packages
-
-FIXME: starter pack or just collect everything manually
-
-#### Running as a script
-
-The easiest way is to follow the prerequisities as suggested, and then running 
-```
-python detect_vehicles.py
-```
-
-#### Importing, then running
-
-```
-from carnd_vehicle_detection import detect_vehicles
-detect_vehicles(FIXME)
-```
-
 ## The project 
 
 ### Goals
 
+
+
 ### My approach
 
-TODO: maybe something general about how I implemented the pipeline, if this is not clear just looking at the 
-rubric points. 
+
 
 ### Overview of my solution in terms of the rubric points 
 
@@ -141,76 +143,93 @@ rubric points.
 ##### FIXME: some color histogram stuff maybe
 ##### Extracting the HOG features, the first attempt
 
-FIXME: describe what was attempted
+The histogram of oriented gradients is a nice approach to indclude some generic shape templates in the feature vector.  
+The method determines (discrete) gradient directions an magnitudes for each pixel in the image, and then bins them 
+according to the chosen cell size and blocking scheme. 
+
+
+The result is a histogram of gradient directions for each cell, 
+weighted by the magnitudes, so that the dominant gradient directions are extracted. 
+This is illustrated in the image below. 
+
+FIXME: include image of hog features. 
+
+The number of direction bins to use can be provided as a parameter. I had played around with different numbers
+of bins in the labs preceding the project, but did not have any systematic hunch of what works and why. 
+
+As my pipeline started to grow rather heavy computation-wise, I figured I need to settle on a rather small
+amount of bins so the processing would not take too long. I did not observe any systematic difference between different 
+ bin numbers, so I ended up using 9 as suggested in the labs. 
+ 
+As for the number of cells per block, I used the suggested 8 x 8. The rationale for this can be summarized as follows:  
+
+* I figured it would be nice to have training image sizes, and later candidate image sizes, to be multiples of 
+  the cell width. This way, especially in the valuable training data, no information needs to be discarded in the 
+  HOG feature vector due to a too narrow band of pixels at the right or at the bottom of an image. 
+* Another scale related thing is that for each 64x64 sized image, I wanted to have a reasonable number of cells.  
+  Going below 8 seemed like some of the bigger-scale spatial features would be lost. 
+  On the other hand, to be able to have more than 8x8 cells, the pixels per cell value would have to be set so 
+  low I suspected the cell values would become unstable. To be able to form a meanigful histogram of 
+  gradient orientations, it seems to me one needs at least a few dozen samples, and this from this point of view
+  also 8x8 pixels seems like a reasonable choice. 
+
+The cells per block parameter was left at 2. My reasoning was that again, the training images being 64x64, 
+one would not want to normalize over a too large area to preserve enough of the local features. Not sure if this 
+reasoning makes sense, but also [this presentation on pedestrian detection](https://www.youtube.com/watch?v=7S5qXET179I)
+suggests 8 pixels per cell and 2 cells per block should be a nice compromise. There is a slide concerning the 
+miss rates using various combinations of the parameters, and a choice of 8 and 2 yields the smallest miss rate. 
 
 ###### The Relationship Between Moving Windows and HOG Features
 
-For the training data, the HOG feature vector is quite straightforward: the vector needs to be extracted for each image 
-anyway. When scanning an image for vehicle matches, the situation is different. The proposed solution will iterate over 
-each frame using a multitude subimages (corresponding to "moving windows") as FIXME(described above|check that I have 
-explained this somewhere). To scan the frame thoroughly enough, even at a single scale there will be a lot of overlap 
-between the windows to avoid missing vehicles due to the effect of the windowing step. FIXME(See an exaggerated 
-illustration of this effect in the figure below.|Make a figure with a very probable false negative because of too 
-long steps). In a naive implementation, the HOG features would be extracted multiple times for each of these 
-overlapping regions. 
+When planning my algorithm, I first tried to implement a method of my own for the window search, kind of thinking 
+of the scaling in reverse order compared to the code snippet provided as an example. I tried to keep the 
+frames in their original size, and choose the candidate window locations and sizes so as to be able to extract the same 
+HOG information as that from the 64x64 training images. The method to do this is rather convoluted, 
+and contains a lot of intricate details on how exactly the cells should be placed at least if the 
+features were to mach the chosen window location exactly. I will not describe the approach here in any 
+more detail as I am unaware if it even has any benefits to the standard one. It was a nice learning experience 
+anyway. The code is still included in the repository and maybe I try to get it to work again. 
 
-This overhead in processing is further emphasized with the multi-scale search method outlined above. With e.g. three 
-different scales of search windows. 
+As for the standard approach, the `find_cars` function provided in the project instructions essentially  
+scales the whole frame according to the provided scale parameter, and then looks for car detections in 
+candidate windows of size 64x64 so the processing is quite straightforward. The only bit about this 
+that is rather convoluted is the computation of the various mapped x and y locations, step sizes etc. 
 
-Due to the performance issue outlined above, I decided to extract the HOG features just once for every scale. However, 
-this needs to be planned carefully together with the scaling and windowing algorithms due to the following effect: 
+##### Spatial Features an Color Histograms
 
-_The HOG feature vector needs to be of the same size independent of scale, and the semantics of each positional element
-in the vector needs to stay consistent across scales._ In practice this means that the cell counts in each dimension 
- must be altered for the HOG transform so as to obtain a consistent amount of cells where orientation histograms 
-are computed. This is somewhat hinted at in the example code provided for the project, but just for the sake of it, 
-I decided to implement my own version of the scaling algorithm. 
+During the project, I experimented both with including all the three feature sets both with including all the three 
+feature sets both with including all the three feature sets both with including all the three feature sets in the 
+final feature vector, and leaving the color histogram and spatial features out. Here are some thoughts on each of 
+these feature categories and why they may not be as important for vehicle detection as the HOG features. 
 
-The outline of my scaling algorithm is as follows. One should remember here that for the training data, the 
-image size is 64x64 pixels and the pix_per_cell parameter value is 8 so the images are divided into 8x8 cells.  
+###### Spatial features
 
-* As 64x64 pixels corresponds to a rather small portion of the video frames, and hence vehicle detections pretty far 
-  away from the camera, I figured there is no point going below 64x64 pixels for the windows. So, I'm using windows 
-  sizes from 64x64 pixels upwards.  
-* Upon choosing window sizes, to avoid any unwanted scaling effects, I wanted the new windows sizes to be exact 
-  multiples of 8. This guarantees that all the windowed test images can be evenly divided into cells by the algotirhm 
-  described below and there are now leftover cells or windows smaller than the others due to roundings because of 
-  fractional division results.  
-* Another natural requirement is that the windows are square in shape just like the training data.  
-* Now, any window sizes from the sequence 64x64, 72x72 (9 by 9 cells), 80x80 (10 by 10 cells), 88x88 (11 by 11 cells) 
-  etc. would satisfy the requirements above. I decided to first attempt with not too many scales, and the largest scale 
-  being suitable for detecting vehicles just in front of the camera. With these requirements in mind, and after 
-  evaluating the performance of the solution, I ended up using just three different scales: 64x64, 128x128 and 256x256 
-  pixels. 
-* Yet another requirement, to be able to pick pre-computed HOG feature subsets exactly at the correct positions, the 
-  window movement step sizes must be multitudes of the scale-specific pix_per_cell values.  
-  
-With the scheme outlined above, for each scale I'll use a pix_per_cell values of 
-new_win_widht / original_window_width * 8, guaranteed to be an even number and also guaranteed to produce a uniform 
-cell grid on the windows with no leftover pixels or any other weirdness. 
+The spatial features vector is just a compressed version of the original image. While the main characteristics of e.g.  
+a vehicle are still preserved in a, say, 32x32 pixel image, I doubt the usefulness of such a feature vector
+depends heavily on the type of classifier used. As I ended up using an SVM classifier for the project,  
+I am not really sure if any linear decision surface would be able to use the compressed version of an 
+image very efficiently.
 
-For a specific scale, the HOG feature extraction using this scaled pix_per_cell count is now applied over all of the 
-region of interest just once, and then for each individual window, 
+If I were to use a convolutional neural network, for example, the situation might be different, though. 
 
+###### Color histogram
 
-There is another consideration with the formation of the HOG feature vectors: while the method of computing the HOG 
-features for the training images (producing feature arrays of shape FIXME, collected directly as flattened feature 
-vectors of size FIXME),  
+As for the color histogram, I think its usefulness in a SVM classifier context may be a bit better justified 
+than that of the spatial feature vector. This is especially true for alternative color spaces that 
+are probably better able to distinguish between saturated "artificial" colors used in vehicles, and 
+the more washed out background of a road environment. Care should be taken though so the classifier 
+does not go totally wild in a colorful city environment. 
+
+Even for the color histograms, my findings did not suggest an immediate usefulness, but in a real-world 
+detection problem, I would probably still consider incluging them due to the potential effects mentioned above. 
+
+However, in conclusion regarding both the spatial and color histogram features, I had a hard time obtaining a stable 
+vehicle detection so I ended up including all of the suggested features
+anyway, hoping they would provide even a tiny bit of assistance in detecting vehicles in more challenging 
+portions of the video.  
 
 
 
-**The inefficiency of extracting HOG features for each **
-
-I initially experimented with extracting the 
-
-Due to various 
-
-
-##### Extracting the HOG features, reboot 
-
-FIXME: describe the other approach with resizing the window according to scale and proceeding from there 
-
-##### The histogram and spatial features
 
 #### Training the classifier
 
