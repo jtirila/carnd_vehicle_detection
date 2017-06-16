@@ -2,11 +2,12 @@ import numpy as np
 from scipy.ndimage.measurements import label
 
 
-def add_labeled_heatmap(image, hot_windows):
+def add_labeled_heatmap(image, hot_windows, aggregated_heatmap):
     heat = np.zeros_like(image[:, :, 0]).astype(np.float)
     heat = _add_heat(heat, hot_windows)
     heatmap = np.clip(heat, 0, 255)
-    heatmap = _apply_threshold(heatmap, 8)
+    aggregated_heatmap.process_new_heatmap(heatmap)
+    heatmap = _apply_threshold(aggregated_heatmap.smoothed_heatmap(), 15)
     labels = label(heatmap)
     return labels
 

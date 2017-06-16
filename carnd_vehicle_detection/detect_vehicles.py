@@ -11,6 +11,7 @@ from carnd_vehicle_detection import ROOT_DIR
 from carnd_vehicle_detection.classify import get_classifier
 from carnd_vehicle_detection.mask import add_labeled_heatmap
 from carnd_vehicle_detection.preprocess import normalize_luminosity
+from carnd_vehicle_detection.models import AggregatedHeatmap
 # This is the default video to read as input.
 from carnd_vehicle_detection.traverse_image import find_cars
 from carnd_vehicle_detection.utils import fc
@@ -34,7 +35,7 @@ EXTRACT_PARAMS = {
     'cell_per_block': 2,
     'hog_channel': "ALL",
     'spatial_size': (32, 32),
-    'hist_bins': 32,
+    'hist_bins': 55,
     'spatial_feat': True,
     'hist_feat': True,
     'hog_feat': True
@@ -42,7 +43,7 @@ EXTRACT_PARAMS = {
 
 _DEFAULT_Y_STARTS_STOPS_PER_SCALE = {
     0.5: [420, 600],
-    1: [420, 600],
+    1: [380, 600],
     1.5: [370, 690],
     2: [370, 690],
     2.2: [370, 690],
@@ -50,7 +51,7 @@ _DEFAULT_Y_STARTS_STOPS_PER_SCALE = {
     3: [370, 690]}
 _DEFAULT_X_STARTS_STOPS_PER_SCALE = {
     0.5: [300, 980],
-    1: [300, 980],
+    1: [100, 1180],
     1.5: [None, None],
     2: [None, None],
     2.2: [None, None],
@@ -87,11 +88,12 @@ def detect_vehicles(input_video_path=PROJECT_VIDEO_PATH, output_path=_PROJECT_OU
                                           extract_features_dict=EXTRACT_PARAMS)
     classifier = classifier_and_score['classifier']
     scaler = classifier_and_score['scaler']
-    transformed_clip = clip.fl_image(lambda image: search_for_cars(image, classifier, scaler))
+    ahm = AggregatedHeatmap()
+    transformed_clip = clip.fl_image(lambda image: search_for_cars(image, classifier, scaler, ahm))
     transformed_clip.write_videofile(output_path, audio=False)
 
 
-def search_for_cars(raw_image, classifier, scaler, scales=_DEFAULT_SCALES,
+def search_for_cars(raw_image, classifier, scaler, aggregated_heatmp, scales=_DEFAULT_SCALES,
                     y_starts_stops=_DEFAULT_Y_STARTS_STOPS_PER_SCALE, x_starts_stops=_DEFAULT_X_STARTS_STOPS_PER_SCALE,
                     extract_params=deepcopy(EXTRACT_PARAMS)):
     """Using a moving windows method at different scales, traverses the image and looks for vehicle detections.
@@ -125,7 +127,7 @@ def search_for_cars(raw_image, classifier, scaler, scales=_DEFAULT_SCALES,
             # find_cars(image, y_start_stop, y_start_stop, scale, classifier, scaler, extract_params)
             fc(image, *y_start_stop, *x_start_stop, scale, classifier, scaler, **extract_params)
         )
-    labels = add_labeled_heatmap(image, hot_windows)
+    labels = add_labeled_heatmap(image, hot_windows, aggregated_heatmp)
     return draw_labeled_bboxes(draw_img, labels)
 
 

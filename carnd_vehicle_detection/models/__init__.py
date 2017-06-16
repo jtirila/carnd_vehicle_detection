@@ -1,1 +1,2 @@
 from .detected_vehicle import DetectedVehicle
+from .aggregated_heatmap import AggregatedHeatmap
