@@ -14,6 +14,7 @@
 [candidate_image_ch0]: ./output_images/candidate_image_channel_0.png "YCrCb conversion, first channel"
 [candidate_image_ch1]: ./output_images/candidate_image_channel_1.png "YCrCb conversion, second channel"
 [candidate_image_ch2]: ./output_images/candidate_image_channel_2.png "YCrCb conversion, third channel"
+[image_to_scan]: ./output_images/image_to_scan.png "Another candidate image"
 [another_candidate_image]: ./output_images/another_candidate_image.png "Another candidate image"
 [another_candidate_image_features]: ./output_images/another_candidate_image_features.png "Another candidate image, features"
 [yet_another_candidate_image]: ./output_images/yet_another_candidate_image.png "Another candidate image"
@@ -176,13 +177,24 @@ Once the script is done, by default is has produced a video called `transformed.
 
 ### Goals
 
+The goals / steps of this project are the following:
 
+* Perform a Histogram of Oriented Gradients (HOG) feature extraction on a labeled training set of images and train a 
+  classifier Linear SVM classifier
+* Optionally, you can also apply a color transform and append binned color features, as well as histograms of color, 
+  to your HOG feature vector. 
+* Implement a sliding-window technique and use your trained classifier to search for vehicles in images.
+* Run your pipeline on a video stream  
+  and create a heat map of recurring detections frame by frame to reject outliers and follow detected vehicles
+* Estimate a bounding box for vehicles detected.
 
 ### My approach
 
+In addition to the hints given in the project instructions, I decided to try adding some colorspace 
+preprocessing, augment the training data set with some generated images, and implement a 
+custom method for stabilizing the vehicle detections across frames.  
 
-
-### Overview of my solution in terms of the rubric points 
+### Overview of my Solution in Terms of the Rubric Points 
 
 #### Data Preprocessing
 
@@ -191,10 +203,9 @@ Once the script is done, by default is has produced a video called `transformed.
 Both when training the classifier and when making predictions, before entering the actual feature extraction loop, 
 I first perform some simple preprocessing using my pet technique: histogram normalization of the Y channel after first 
 converting the images to `YUV` color space, and then converting them back to `RGB`. This method is performed with 
-the aim of enhancing contrast in the images. Below is an example of this method. 
+the aim of enhancing contrast in the images. Below is an example image after this method applied.  
 
-
-![][]
+![image_to_scan][image_to_scan]
 
 I also experimented with other techniques such as normalizing the saturation channel after a HLS transformation, 
 and also some adaptive smoothing methods to get rid of noise in the images. However, especially the smoothing seemed 
@@ -323,7 +334,14 @@ def bin_spatial(img, size=(32, 32)):
     return np.hstack((color1, color2, color3))
 ```
 
-Below is an example of another candidate image together with its spatial feature vector 
+Below The goals / steps of this project are the following:
+
+* Perform a Histogram of Oriented Gradients (HOG) feature extraction on a labeled training set of images and train a classifier Linear SVM classifier
+* Optionally, you can also apply a color transform and append binned color features, as well as histograms of color, to your HOG feature vector. 
+* Note: for those first two steps don't forget to normalize your features and randomize a selection for training and testing.
+* Implement a sliding-window technique and use your trained classifier to search for vehicles in images.
+* Run your pipeline on a video stream (start with the test_video.mp4 and later implement on full project_video.mp4) and create a heat map of recurring detections frame by frame to reject outliers and follow detected vehicles.
+* Estimate a bounding box for vehicles detected.is an example of another candidate image together with its spatial feature vector 
 (32x32x3 = 3072 pixels, using the `YCrCb` color space). 
 
 ![yet_another_candidate_image][yet_another_candidate_image]
@@ -589,13 +607,14 @@ heatmaps. This is done with the following aims:
 The `AggregatedHeatmap` class is reproduced entirely below: 
 
 ```python
-
-np.ones((8, 8))
-SMOOTHING_KERNEL = np.array([[0.25, 0.25], [0.25, 0.25]])
+SMOOTHING_KERNEL = np.ones((8, 8))
+SMOOTHING_KERNEL[2:-2, 2:-2] = 2
+SMOOTHING_KERNEL[3:-3, 3:-3] = 4
+SMOOTHING_KERNEL = SMOOTHING_KERNEL / np.sum(SMOOTHING_KERNEL)
 
 class AggregatedHeatmap:
     def __init__(self):
-        self.smoothed_heatmaps = np.zeros((5, 720, 1280))
+        self.smoothed_heatmaps = np.zeros((7, 720, 1280))
 
     def process_new_heatmap(self, heatmap):
         self.smoothed_heatmaps = np.roll(self.smoothed_heatmaps, 1, 0)
@@ -607,7 +626,8 @@ class AggregatedHeatmap:
         return cv2.filter2D(heatmap, -1, SMOOTHING_KERNEL)
 
     def smoothed_heatmap(self):
-        return np.average(self.smoothed_heatmaps, 0, [30, 28, 14, 10, 8])
+        return np.average(self.smoothed_heatmaps, 0, [50, 40, 30, 20, 20, 10, 10])  \
+               * np.count_nonzero(self.smoothed_heatmaps, 0)
 ```
 
 And the part where it is used is in the heatmap processing (`mask/heatmap.py`): 
@@ -653,15 +673,7 @@ The orchestration of processing the individual frames and saving them into a new
  
  I uploaded the result video to YouTube. It is embedded below if you are reading a rendered version of this writeup. 
  
- 
-[My output video](https://img.youtube.com/vi/YOUTUBE_VIDEO_ID_HERE/0.jpg)](https://www.youtube.com/watch?v=YOUTUBE_VIDEO_ID_HERE) 
-
-
-With the computationan demands of the heatmap aggregation step, the processing time of the video on my lapstop 
-
-
-TODO: maybe  upload the video to YouTube and include a (image) link to the video in the writeup, as 
-per https://stackoverflow.com/a/16079387
+[My output video](https://img.youtube.com/vi/vW3-68DhNfI/0.jpg)](https://www.youtube.com/watch?v=vW3-68DhNfI) 
 
 ### Discussion
 
