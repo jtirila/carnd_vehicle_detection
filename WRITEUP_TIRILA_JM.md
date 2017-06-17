@@ -6,18 +6,27 @@
 
 [//]: # (Image References)
 
-[training_sample_img]: ./writeup_images/training_sample_img.png "An example training image"
-[per_sample_y_channel_compaison]: ./writeup_images/fixme "The effect of per-image Y channel normalization"
-[stacked_y_channel_compaison]: ./writeup_images/fixme "The effect of Y channel normalization on the stack of images"
-[ycrcb_conversion_ch0]: ./writeup_images/fixme "YCrCb conversion, first channel"
-[ycrcb_conversion_ch1]: ./writeup_images/fixme "YCrCb conversion, second channel"
-[ycrcb_conversion_ch2]: ./writeup_images/fixme "YCrCb conversion, third channel"
-[augmentation_example_images]: ./writeup_images/fixme "Some example images from the augmenting set"
-[image4]: ./examples/placeholder.png "Traffic Sign 1"
-[image5]: ./examples/placeholder.png "Traffic Sign 2"
-[image6]: ./examples/placeholder.png "Traffic Sign 3"
-[image7]: ./examples/placeholder.png "Traffic Sign 4"
-[image8]: ./examples/placeholder.png "Traffic Sign 5"
+[training_sample_img]: ./output_images/training_sample_img.png "An example training image"
+[per_sample_y_channel_compaison]: ./output_images/fixme "The effect of per-image Y channel normalization"
+[stacked_y_channel_comparison]: ./output_images/fixme "The effect of Y channel normalization on the stack of images"
+[image_to_scan]: ./output_images/image_to_scan.png "The image to scan"
+[candidate_image]: ./output_images/candidate_image.png "Candidate image"
+[candidate_image_ch0]: ./output_images/candidate_image_channel_0.png "YCrCb conversion, first channel"
+[candidate_image_ch1]: ./output_images/candidate_image_channel_1.png "YCrCb conversion, second channel"
+[candidate_image_ch2]: ./output_images/candidate_image_channel_2.png "YCrCb conversion, third channel"
+[another_candidate_image]: ./output_images/another_candidate_image.png "Another candidate image"
+[another_candidate_image_features]: ./output_images/another_candidate_image_features.png "Another candidate image, features"
+[yet_another_candidate_image]: ./output_images/yet_another_candidate_image.png "Another candidate image"
+[yet_another_candidate_image_spatial_features]: ./output_images/yet_another_candidate_image_spatial_features.png "Another candidate image, spatial features"
+[yet_another_candidate_image_2]: ./output_images/yet_another_candidate_image_2.png "Another candidate image"
+[yet_another_candidate_image_2_hist_features]: ./output_images/yet_another_candidate_image_2_hist_features.png "Another candidate image, hist features"
+[augmentation_example_images]: ./output_images/some_augmentation_images.png "Some example images from the augmenting set"
+[car_training_img]: ./output_images/car_training_image.png "Traffic Sign 1"
+[car_training_img_hog_ch0]: ./output_images/car_training_image_hog_ch0.png "Traffic Sign 2"
+[raw_detection]: ./output_images/raw_detection.png "All detected boxes (for a single scale)"
+[training_preprocessing_average]: ./output_images/training_preprocessing_average.png "An average preprocessing result"
+[training_preprocessing_improved]: ./output_images/training_preprocessing_improved.png "A preprocessing result where batch seems to help in comparison to raw image"
+[training_preprocessing_batch_advantage]: ./output_images/training_preprocessing_batch_advantage.png "A preprocessing result where batch seems to help in comparison to single image preprocessing"
 
 
 ## Notes on the submission
@@ -206,14 +215,15 @@ To be specific, before equalizing the `Y` channel histogram, I concatenated **al
 large horizontal picture, and then after the normalization, sliced this huge image back into individual training
 images. 
 
-To demonstrate the effect, here is a single training image and the same image after a single-image `Y` channel 
-normalization: 
+To demonstrate the effect, here are a few triplets with the original training image on the left, single-image 
+`Y` channel histogram normalized image in the middle, and the batch normalized image on the right. In all of 
+these images, the batch preprocessed image arguably outperforms the per-image preprocessed version, 
+and at least in the last one some improvement can also be seen in terms of contrast, compared to the original 
+image. 
 
-FIXME: image
-
-Below, on the other hand, is the same image `Y` channel processed using the stacked version of the normalization. 
-
-FIXME: image
+![A normal preprocessing result][training_preprocessing_average] 
+![Batch preprocessing has an edge over per-image preprocessing][training_preprocessing_batch_advantage]
+![Preprocessed slightly better than original][training_preprocessing_improved]
 
 ##### Colorspace Conversion
 
@@ -222,7 +232,11 @@ extraction pipeline, I think it lies conceptually more in the preprocessing doma
 indicated that `YCrCrCb` was a strong candidate and that is what  I ended up using. Below are again (luminosity 
 normalized) original image and the individual color channels after a `YCrCb` conversion: 
 
-FIXME: image
+![candidate_image][candidate_image]
+![candidate_image_ch0][candidate_image_ch0]
+![candidate_image_ch1][candidate_image_ch1]
+![candidate_image_ch2][candidate_image_ch2]
+
 
 ##### Augmenting the Data with Examples From the Project Video 
 
@@ -307,7 +321,11 @@ def bin_spatial(img, size=(32, 32)):
     return np.hstack((color1, color2, color3))
 ```
 
-FIXME: Below is an example of the spatial feature vector of an image, this time calculated for an `RGB` image.
+Below is an example of another candidate image together with its spatial feature vector 
+(32x32x3 = 3072 pixels, using the `YCrCb` color space). 
+
+![yet_another_candidate_image][yet_another_candidate_image]
+![yet_another_candidate_image_spatial_features][yet_another_candidate_image_spatial_features]
 
 ##### Color Histogram 
 
@@ -352,7 +370,11 @@ def color_hist(image, nbins=32, bins_range=(0, 256)):
     return hist_features
 ```
 
-FIXME: Below is an example of the color histogram of an image, using the `YCrCb` color space.
+Below is first yet another candidate image together with its histogram feature vector 
+(using 16 bins per channel and the `YCrCb` color space).
+
+![yet_another_candidate_image_2][yet_another_candidate_image_2]
+![yet_another_candidate_image_2_hist_features][yet_another_candidate_image_2_hist_features]
 
 ##### The HOG features
 
@@ -362,9 +384,11 @@ according to the chosen cell size and blocking scheme.
 
 The result is a histogram of gradient directions for each cell, 
 weighted by the magnitudes, so that the dominant gradient directions are extracted. 
-This is illustrated in the image below. 
+This is illustrated in the image below, with the first figure containing the original image 
+and the second one its HOG visualization (first of the three color channels). 
 
-FIXME: include image of hog features. 
+![car_training_img][car_training_img]
+![car_training_img_hog_ch0][car_training_img_hog_ch0]
 
 The number of direction bins to use can be provided as a parameter. I had played around with different numbers
 of bins in the labs preceding the project, but did not have any systematic hunch of what works and why. 
@@ -391,8 +415,12 @@ reasoning makes sense, but also [this presentation on pedestrian detection](http
 suggests 8 pixels per cell and 2 cells per block should be a nice compromise. There is a slide concerning the 
 miss rates using various combinations of the parameters, and a choice of 8 and 2 yields the smallest miss rate. 
 
-FIXME: Below is an example of first the feature vector extracted using the HOG extractor for all channels in an 
-`YCrCb` image, and subsequently the visualization for the vector produced by OpenCV. 
+Below is an example of first the original candidate image (corresponding to a viewing window) and subsequently 
+its normalized feature vector extracted using only the HOG extractor for all channels in an 
+`YCrCb` image.
+
+![another_candidate_image][another_candidate_image]
+![another_candidate_image_features][another_candidate_image_features]
 
 
 **A note about color space**: the project rubric requires that at this points, colorspace conversion is also discussed. 
@@ -440,6 +468,20 @@ The template only cropped the image in the vertical direction. I made the change
 be able to restrict the are scanned horizontally. This is done on a per-scale basis so that for larger scales, 
 the whole width of an image is scanned, while for smaller scales, matches are only searched closer to the center 
 of the image. This was done to prevent spurious matches outside of the lane of interest. 
+
+##### Normalizing the feature vectors. 
+
+For the feature vector normalization, I used the `StandardScaler` class of `sklearn`. The code below illustrates 
+how it is used for the training features. The usage for other purposes (testing of candidate images, validation) is 
+done similarly, just omitting the first two lines.
+
+```python
+scaler = StandardScaler()
+scaler.fit(extracted_features_train)
+scaled_features_train = scaler.transform(extracted_features_train)
+
+```
+
 
 #### Training the classifier
 
