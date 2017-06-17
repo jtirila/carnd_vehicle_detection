@@ -21,4 +21,4 @@ class AggregatedHeatmap:
 
     def smoothed_heatmap(self):
         return np.average(self.smoothed_heatmaps, 0, [50, 40, 30, 25, 25, 20, 20])  \
-               * np.apply_along_axis(np.count_nonzero, 0, self.smoothed_heatmaps)
+               * np.count_nonzero(self.smoothed_heatmaps, 0)
