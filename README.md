@@ -1,5 +1,7 @@
 # Vehicle detection
 
+(Udacity reviewers, check out [my writeup](./WRITEUP_TIRILA_JM.md))
+
 ## General info
 
 This repository will contain all my work for the Udacity CarND Term1 final project.
