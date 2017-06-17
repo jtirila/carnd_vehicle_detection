@@ -66,7 +66,9 @@ below actually participate in processing the video.
 │   │   ├── bin_spatial.py
 │   │   ├── find_cars.py
 ├── images
-
+│   ├── vehicles 
+│   └── nonvehicles 
+├── output_images
 ├── project_video.mp4
 └── unit_tests
 ```
