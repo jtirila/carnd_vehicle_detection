@@ -2,7 +2,7 @@
 
 **Writeup by J-M Tirilä**
 
-(Work in progress.)
+This document documents what I did for P5 of term1 of the Self Driving Car Engineer Nanodegree Program of Udacity. 
 
 [//]: # (Image References)
 
@@ -135,13 +135,14 @@ functionality resides outside of the test directory.**
 
 #### Launching the vehicle detector
 
-With the prerequisities covered, you can simply run the vehicle detector script by 
+With the prerequisities covered, you can simply run the vehicle detector script by entering the top level directory 
+and issuing
 
 ```
-sh detect_vehicles.py
+python -m carnd_vehicle_detection.detect_vehicles
 ```
 
-in the directory where the file is located, or by launching the Python interpreter and issuing the following commands. 
+or by launching the Python interpreter and issuing the following commands. 
 
 ```python
 from carnd_vehicle_detection.detect_vehicles import detect_vehicles
@@ -364,12 +365,13 @@ does not go totally wild in a colorful city environment.
 Even for the color histograms, my findings did not suggest an immediate usefulness, but in a real-world 
 detection problem, I would probably still consider including them due to the potential effects mentioned above. 
 
-However, in conclusion regarding both the spatial and color histogram features, I had a hard time obtaining a stable 
-vehicle detection so I ended up including all of the suggested features
-anyway, hoping they would provide even a tiny bit of assistance in detecting vehicles in more challenging 
-portions of the video.  
+However, in conclusion regarding both the spatial and color histogram features, even though I had a hard time obtaining 
+a stable vehicle detection and at times thought I should use all available features, _I ended up not using 
+color histogram features in the final submission_. This is at least in part due to 
+the relatively great amount of time spent calculating the histograms, according to a cProfile run
+I performed to find out what was taking so long in my algorithm. 
 
-The color histogram feature vector used in this project is computed using the following code. 
+Anyhow, the color histogram feature vector used in this project is computed using the following code. 
 
 ```python
 def color_hist(image, nbins=32, bins_range=(0, 256)):
@@ -674,8 +676,6 @@ The orchestration of processing the individual frames and saving them into a new
  I uploaded the result video to YouTube. It is embedded below if you are reading a rendered version of this writeup. 
  
 [![My output video](https://img.youtube.com/vi/wW3-68DhNfI/0.jpg)](https://www.youtube.com/watch?v=wW3-68DhNfI) 
-
-
 
 ### Discussion
 
