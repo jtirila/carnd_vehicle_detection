@@ -1,4 +1,5 @@
 import numpy as np
+from multiprocessing import Pool
 import cv2
 
 SMOOTHING_KERNEL = np.ones((8, 8))
@@ -20,5 +21,20 @@ class AggregatedHeatmap:
         return cv2.filter2D(heatmap, -1, SMOOTHING_KERNEL)
 
     def smoothed_heatmap(self):
-        return np.average(self.smoothed_heatmaps, 0, [50, 40, 30, 25, 25, 20, 20])  \
-               * np.apply_along_axis(np.count_nonzero, 0, self.smoothed_heatmaps)
+        p = Pool(4)
+        arr = self.smoothed_heatmaps[:, :, :]
+        slice1 = arr[:, :360, :640]
+        slice2 = arr[:, 360:, :640]
+        slice3 = arr[:, :360, 640:]
+        slice4 = arr[:, 360:, 640:]
+        slices = p.map(self.some_fun, [slice1, slice2, slice3, slice4])
+        return_arr = np.zeros((arr.shape[1], arr.shape[2]))
+        return_arr[:360, :640] = slices[0]
+        return_arr[360:, :640] = slices[1]
+        return_arr[:360, 640:] = slices[2]
+        return_arr[360:, 640:] = slices[3]
+        return return_arr
+
+    @staticmethod
+    def some_fun(x):
+        return np.average(x, 0, [50, 40, 30, 25, 25, 20, 20]) * np.apply_along_axis(np.count_nonzero, 0, x)
