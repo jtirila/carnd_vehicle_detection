@@ -25,16 +25,18 @@ def find_cars(img, ystart, ystop, xstart, xstop, scale, svc, X_scaler, color_spa
 
     img_tosearch = draw_img[ystart:ystop, xstart:xstop, :]
     ctrans_tosearch = convert_color(img_tosearch, conv=color_space)
+    orig_resized = np.copy(img_tosearch)
     if scale != 1:
         imshape = ctrans_tosearch.shape
         ctrans_tosearch = cv2.resize(ctrans_tosearch, (np.int(imshape[1] / scale), np.int(imshape[0] / scale)))
+        orig_resized = cv2.resize(orig_resized, (np.int(imshape[1] / scale), np.int(imshape[0] / scale)))
 
-    else:
-        pass
-        # if COUNTER == 7:
-        #     plt.imshow(ctrans_tosearch)
-        #     plt.show()
 
+    t, f = True, False
+    if f:
+        plt.imshow(orig_resized)
+        plt.title("Original image at scale {}".format(scale))
+        plt.show()
 
     ch1 = ctrans_tosearch[:, :, 0]
     ch2 = ctrans_tosearch[:, :, 1]
@@ -89,7 +91,7 @@ def find_cars(img, ystart, ystop, xstart, xstop, scale, svc, X_scaler, color_spa
 
             # Extract the image patch
             subimg = cv2.resize(ctrans_tosearch[ytop:ytop + window, xleft:xleft + window], (64, 64))
-            subimg = normalize_luminosity(subimg)
+            subimg_orig = cv2.resize(orig_resized[ytop:ytop + window, xleft:xleft + window], (64, 64))
 
             # Get color features
             if spatial_feat:
@@ -101,9 +103,14 @@ def find_cars(img, ystart, ystop, xstart, xstop, scale, svc, X_scaler, color_spa
             raw_features = np.hstack(img_features).reshape(1, -1)
             test_features = X_scaler.transform(raw_features)
             test_prediction = svc.predict(test_features)
-            if COUNTER == 7:
+            if COUNTER == 1:
                 pass
+                # plt.imshow(subimg_orig)
+                # plt.title("Original image, pred result: {}, scale: {}".format(test_prediction, scale))
+                # plt.show()
                 # plt.imshow(subimg)
+                # plt.title("Original image color converted, pred result: {}".format(test_prediction))
+                # plt.show()
                 # plt.imshow(subimg[:, :, 0], cmap='gray')
                 # plt.title("Predicdtion result: {}, channel: 0".format(test_prediction))
                 # plt.show()
@@ -119,12 +126,10 @@ def find_cars(img, ystart, ystop, xstart, xstop, scale, svc, X_scaler, color_spa
                 # else:
                 #     filename = 'feature_test_img_nocar.png'
 
-                # plt.imshow(subimg)
-                # plt.show()
                 # mpimg.imsave(os.path.join(ROOT_DIR, 'unit_tests', 'test_images', filename), subimg)
                 # print("Saved image")
-                # plt.plot(list(range(len(test_features.T))), raw_features.T)
-                plt.show()
+                # plt.plot(list(range(len(test_features.T))), test_features.T)
+                # plt.show()
 
             if test_prediction == 1:
                 xbox_left = np.int(xleft * scale)

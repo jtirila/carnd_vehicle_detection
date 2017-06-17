@@ -1,43 +1,16 @@
 from moviepy.editor import VideoFileClip
-from carnd_vehicle_detection.detect_vehicles import PROJECT_VIDEO_PATH
+from carnd_vehicle_detection.detect_vehicles import DEFAULT_INPUT_VIDEO_PATH
 from carnd_vehicle_detection import ROOT_DIR
 import os
 
 SUBCLIP_OUTPUT_DIRECTORY = os.path.join(ROOT_DIR, 'unit_tests', 'test_videos')
 
 
-def save_subclips(video_path=PROJECT_VIDEO_PATH):
-    # clip = VideoFileClip(video_path)
-    # subclip = clip.subclip(35, 36)
-    # subclip.write_videofile(os.path.join(SUBCLIP_OUTPUT_DIRECTORY, 'subclip_35__36.mp4'),
-    #                         audio=False)
-
-    # clip = VideoFileClip(video_path)
-    # subclip = clip.subclip(35.0, 35.3)
-    # subclip.write_videofile(os.path.join(SUBCLIP_OUTPUT_DIRECTORY, 'subclip_35__35_3.mp4'),
-    #                         audio=False)
-
+def save_subclip(video_path=DEFAULT_INPUT_VIDEO_PATH, start=0, end=10):
     clip = VideoFileClip(video_path)
-    subclip = clip.subclip(20.0, 25)
-    subclip.write_videofile(os.path.join(SUBCLIP_OUTPUT_DIRECTORY, 'subclip_20__25.mp4'),
+    subclip = clip.subclip(start, end)
+    subclip.write_videofile(os.path.join(SUBCLIP_OUTPUT_DIRECTORY, 'subclip_{}__{}.mp4'.format(start, end)),
                             audio=False)
-
-
-    clip = VideoFileClip(video_path)
-    subclip = clip.subclip(20, 35)
-    subclip.write_videofile(os.path.join(SUBCLIP_OUTPUT_DIRECTORY, 'subclip_20__35.mp4'),
-                            audio=False)
-    # for start in (0, 15, 30):
-    #     subclip = clip.subclip(start, start + 5)
-    #     subclip.write_videofile(os.path.join(SUBCLIP_OUTPUT_DIRECTORY, 'subclip_{}__{}.mp4'.format(start, start + 5)),
-    #                             audio=False)
-
-    # # Save also a couple of longer pieces
-    # subclip = clip.subclip(0, 15)
-    # subclip.write_videofile(os.path.join(SUBCLIP_OUTPUT_DIRECTORY, 'subclip_0__15.mp4'), audio=False)
-
-    # subclip = clip.subclip(15, 30)
-    # subclip.write_videofile(os.path.join(SUBCLIP_OUTPUT_DIRECTORY, 'subclip_15__30.mp4'), audio=False)
 
 if __name__ == "__main__":
-    save_subclips()
+    save_subclip(start=0, end=15)

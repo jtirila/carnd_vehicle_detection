@@ -58,7 +58,7 @@ difficult to figure out.
 
 ## The writeup
 
-(Note: no point following the link just yet.)
+(The writeup is work in progress.)
 
 Udacity people, look this way please. My written report can be found by following [this link](./WRITEUP_TIRILA_JM.md).
 

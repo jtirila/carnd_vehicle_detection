@@ -1,4 +1,4 @@
-from carnd_vehicle_detection import PROJECT_VIDEO_PATH
+from carnd_vehicle_detection import DEFAULT_INPUT_VIDEO_PATH
 from moviepy.editor import VideoFileClip
 from unit_tests import TEST_IMG_DIR
 from glob import glob
@@ -10,7 +10,7 @@ import os
 
 
 def save_some_frames_and_subframes():
-    cap = cv2.VideoCapture(PROJECT_VIDEO_PATH)
+    cap = cv2.VideoCapture(DEFAULT_INPUT_VIDEO_PATH)
 
     frame_count = 1
     saved_pair_count = 1

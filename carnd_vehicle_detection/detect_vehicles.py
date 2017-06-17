@@ -1,35 +1,31 @@
 import os
 from copy import deepcopy
-import matplotlib.image as mpimg
-import matplotlib.pyplot as plt
-
 import numpy as np
 from moviepy.editor import VideoFileClip
-from scipy.ndimage.measurements import label
 
 from carnd_vehicle_detection import ROOT_DIR
 from carnd_vehicle_detection.classify import get_classifier
 from carnd_vehicle_detection.mask import add_labeled_heatmap
-from carnd_vehicle_detection.preprocess import normalize_luminosity, bilateral_filter
+from carnd_vehicle_detection.preprocess import normalize_luminosity
 from carnd_vehicle_detection.models import AggregatedHeatmap
-# This is the default video to read as input.
 from carnd_vehicle_detection.traverse_image import find_cars
 from carnd_vehicle_detection.visualize import draw_labeled_bboxes
 
-# PROJECT_VIDEO_PATH = os.path.join(ROOT_DIR, 'project_video.mp4')
-# PROJECT_VIDEO_PATH = os.path.join(ROOT_DIR, 'unit_tests', 'test_videos', 'subclip_0__15.mp4')
-# PROJECT_VIDEO_PATH = os.path.join(ROOT_DIR, 'unit_tests', 'test_videos', 'subclip_15__20.mp4')
-# PROJECT_VIDEO_PATH = os.path.join(ROOT_DIR, 'unit_tests', 'test_videos', 'subclip_20__25.mp4')
-# PROJECT_VIDEO_PATH = os.path.join(ROOT_DIR, 'unit_tests', 'test_videos', 'subclip_20__35.mp4')
-# PROJECT_VIDEO_PATH = os.path.join(ROOT_DIR, 'unit_tests', 'test_videos', 'subclip_15__30.mp4')
-PROJECT_VIDEO_PATH = os.path.join(ROOT_DIR, 'unit_tests', 'test_videos', 'subclip_35__36.mp4')
-# PROJECT_VIDEO_PATH = os.path.join(ROOT_DIR, 'unit_tests', 'test_videos', 'subclip_35__35_3.mp4')
+# DEFAULT_INPUT_VIDEO_PATH = os.path.join(ROOT_DIR, 'project_video.mp4')
+# DEFAULT_INPUT_VIDEO_PATH = os.path.join(ROOT_DIR, 'unit_tests', 'test_videos', 'subclip_0__15.mp4')
+# DEFAULT_INPUT_VIDEO_PATH = os.path.join(ROOT_DIR, 'unit_tests', 'test_videos', 'subclip_15__20.mp4')
+# DEFAULT_INPUT_VIDEO_PATH = os.path.join(ROOT_DIR, 'unit_tests', 'test_videos', 'subclip_20__25.mp4')
+DEFAULT_INPUT_VIDEO_PATH = os.path.join(ROOT_DIR, 'unit_tests', 'test_videos', 'subclip_20__35.mp4')
+# DEFAULT_INPUT_VIDEO_PATH = os.path.join(ROOT_DIR, 'unit_tests', 'test_videos', 'subclip_23__25.mp4')
+# DEFAULT_INPUT_VIDEO_PATH = os.path.join(ROOT_DIR, 'unit_tests', 'test_videos', 'subclip_15__30.mp4')
+# DEFAULT_INPUT_VIDEO_PATH = os.path.join(ROOT_DIR, 'unit_tests', 'test_videos', 'subclip_35__36.mp4')
+# DEFAULT_INPUT_VIDEO_PATH = os.path.join(ROOT_DIR, 'unit_tests', 'test_videos', 'subclip_35__35_3.mp4')
 
-_PROJECT_OUTPUT_PATH = os.path.join(ROOT_DIR, 'transformed.mp4')
+_DEFAULT_VIDEO_OUTPUT_PATH = os.path.join(ROOT_DIR, 'transformed.mp4')
 _DEFAULT_CLASSIFIER_PATH = os.path.join(ROOT_DIR, 'classifier.p')
 
 
-EXTRACT_PARAMS = {
+DEFAULT_EXTRACT_PARAMS = {
     'color_space': 'YCrCb',
     'orient': 9,
     'pix_per_cell': 8,
@@ -43,29 +39,31 @@ EXTRACT_PARAMS = {
 }
 
 _DEFAULT_Y_STARTS_STOPS_PER_SCALE = {
-    0.5: [420, 600],
-    1: [380, 600],
-    1.4: [370, 690],
-    1.5: [370, 690],
-    1.7: [370, 690],
-    2: [370, 690],
-    2.2: [370, 690],
-    2.5: [370, 690],
-    3: [370, 690]}
+    0.5: [400, 600],
+    1: [400, 600],
+    1.4: [400, 670],
+    1.5: [400, 670],
+    1.7: [400, 670],
+    2: [430, 670],
+    2.2: [430, 670],
+    2.5: [430, 670],
+    3: [430, 670]}
+
 _DEFAULT_X_STARTS_STOPS_PER_SCALE = {
     0.5: [300, 980],
-    1: [100, 1180],
-    1.4: [None, None],
-    1.5: [None, None],
-    1.7: [None, None],
-    2: [None, None],
-    2.2: [None, None],
-    2.5: [300, None],
-    3: [300, None]}
-_DEFAULT_SCALES = (1, 2, 3)
+    1: [150, 1180],
+    1.4: [150, None],
+    1.5: [150, None],
+    1.7: [150, None],
+    2: [150, None],
+    2.2: [150, None],
+    2.5: [150, None],
+    3: [150, None]}
+
+_DEFAULT_SCALES = (1, 1.4, 1.7, 2, 2.5)
 
 
-def detect_vehicles(input_video_path=PROJECT_VIDEO_PATH, output_path=_PROJECT_OUTPUT_PATH,
+def detect_vehicles(input_video_path=DEFAULT_INPUT_VIDEO_PATH, output_path=_DEFAULT_VIDEO_OUTPUT_PATH,
                     previous_classifier_path=_DEFAULT_CLASSIFIER_PATH, new_classifier_path=_DEFAULT_CLASSIFIER_PATH,
                     classifier_training_data=None):
     """Process the video whose path is provided as input.
@@ -90,7 +88,7 @@ def detect_vehicles(input_video_path=PROJECT_VIDEO_PATH, output_path=_PROJECT_OU
     else:
         training_data_params = (None, None, None, None)
     classifier_and_score = get_classifier(previous_classifier_path, new_classifier_path, *training_data_params,
-                                          extract_features_dict=EXTRACT_PARAMS)
+                                          extract_features_dict=DEFAULT_EXTRACT_PARAMS)
     classifier = classifier_and_score['classifier']
     scaler = classifier_and_score['scaler']
     ahm = AggregatedHeatmap()
@@ -100,7 +98,7 @@ def detect_vehicles(input_video_path=PROJECT_VIDEO_PATH, output_path=_PROJECT_OU
 
 def search_for_cars(raw_image, classifier, scaler, aggregated_heatmp, scales=_DEFAULT_SCALES,
                     y_starts_stops=_DEFAULT_Y_STARTS_STOPS_PER_SCALE, x_starts_stops=_DEFAULT_X_STARTS_STOPS_PER_SCALE,
-                    extract_params=deepcopy(EXTRACT_PARAMS)):
+                    extract_params=deepcopy(DEFAULT_EXTRACT_PARAMS)):
     """Using a moving windows method at different scales, traverses the image and looks for vehicle detections.
     Returns an image with boxes drawn around detected vehicles.
     

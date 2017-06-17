@@ -51,7 +51,8 @@ def draw_labeled_bboxes(img, labels, color=(0, 0, 255)):
             nonzerox = np.array(nonzero[1])
             # Define a bounding box based on min/max x and y
             bbox = ((np.min(nonzerox), np.min(nonzeroy)), (np.max(nonzerox), np.max(nonzeroy)))
-            # Draw the box on the image
-            cv2.rectangle(img, bbox[0], bbox[1], color, 2)
+            if min(bbox[1][0] - bbox[0][0], bbox[1][1] - bbox[0][1]) > 30:
+                # Draw the box on the image
+                cv2.rectangle(img, bbox[0], bbox[1], color, 2)
         # Return the image
     return img

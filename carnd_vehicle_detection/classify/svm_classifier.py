@@ -1,5 +1,6 @@
 import os
 import pickle
+import numpy as np
 from sklearn.metrics import accuracy_score
 from sklearn.preprocessing import StandardScaler
 from sklearn.svm import LinearSVC as Clf
@@ -45,14 +46,36 @@ def get_classifier(classifier_path=None, classifier_save_path=DEFAULT_CLASSIFIER
     else:
         if None in (features_train, labels_train, features_valid, labels_valid):
             features_train, features_valid, labels_train, labels_valid = read_training_data()
-        # examples = [convert_color(normalize_luminosity(img), conv="YCrCb")
-        #                             for img in features_train[:10]]
-        # for img in examples:
-        #     plt.imshow(img[:, :, 0], cmap='gray')
-        #     plt.show()
-        extracted_features_train = [single_img_features(normalize_luminosity(img), **extract_features_dict)
+        examples_raw = features_train[:20]
+        stacked_train = np.hstack(features_train)
+        stacked_valid = np.hstack(features_valid)
+        img_width = 64
+        print("About to stack and normalize")
+        stacked_normalized_train = normalize_luminosity(stacked_train)
+        stacked_normalized_valid = normalize_luminosity(stacked_valid)
+        print("Finished stacking and normalizing")
+        print(stacked_normalized_train.shape)
+        for start in range(len(features_train)):
+            msg = "Start: {}, end: {}".format(img_width * start, img_width * (start + 1))
+        print(msg)
+
+
+        features_train = [stacked_normalized_train[:, img_width * start:img_width * (start + 1), :] for
+                          start in range(len(features_train))]
+        features_valid = [stacked_normalized_valid[:, img_width * start:img_width * (start + 1), :]
+                          for start in range(len(features_valid))]
+        examples = features_train[:20]
+        for img_raw, img_preprocessed in zip(examples_raw, examples):
+            plt.subplot(1, 3, 1)
+            plt.imshow(img_raw)
+            plt.subplot(1, 3, 2)
+            plt.imshow(normalize_luminosity(img_raw))
+            plt.subplot(1, 3, 3)
+            plt.imshow(img_preprocessed)
+            plt.show()
+        extracted_features_train = [single_img_features(img, **extract_features_dict)
                                     for img in features_train]
-        extracted_features_valid = [single_img_features(normalize_luminosity(img), **extract_features_dict)
+        extracted_features_valid = [single_img_features(img, **extract_features_dict)
                                     for img in features_valid]
 
         scaler = StandardScaler()
@@ -66,7 +89,8 @@ def get_classifier(classifier_path=None, classifier_save_path=DEFAULT_CLASSIFIER
         if classifier_save_path is not None:
             with open(classifier_save_path, 'wb') as outfile:
                 pickle.dump(classifier, outfile)
-            with open(".".join(classifier_save_path.split(".")[:-1]) + '_scaler.p', 'wb') as scalerfile:
+            with open(".".join(classifier_save_path.split(".")[:-1]) + '_scaler.p', 'wb'
+                      ) as scalerfile:
                 pickle.dump(scaler, scalerfile)
 
     return {'classifier': classifier, 'score': score, 'scaler': scaler}

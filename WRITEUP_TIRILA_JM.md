@@ -2,6 +2,24 @@
 
 **Writeup by J-M Tirilä**
 
+(Work in progress.)
+
+[//]: # (Image References)
+
+[training_sample_img]: ./writeup_images/training_sample_img.png "An example training image"
+[per_sample_y_channel_compaison]: ./writeup_images/fixme "The effect of per-image Y channel normalization"
+[stacked_y_channel_compaison]: ./writeup_images/fixme "The effect of Y channel normalization on the stack of images"
+[ycrcb_conversion_ch0]: ./writeup_images/fixme "YCrCb conversion, first channel"
+[ycrcb_conversion_ch1]: ./writeup_images/fixme "YCrCb conversion, second channel"
+[ycrcb_conversion_ch2]: ./writeup_images/fixme "YCrCb conversion, third channel"
+[augmentation_example_images]: ./writeup_images/fixme "Some example images from the augmenting set"
+[image4]: ./examples/placeholder.png "Traffic Sign 1"
+[image5]: ./examples/placeholder.png "Traffic Sign 2"
+[image6]: ./examples/placeholder.png "Traffic Sign 3"
+[image7]: ./examples/placeholder.png "Traffic Sign 4"
+[image8]: ./examples/placeholder.png "Traffic Sign 5"
+
+
 ## Notes on the submission
 
 ### Repository structure
@@ -158,18 +176,53 @@ Once the script is done, by default is has produced a video called `transformed.
 #### Data Preprocessing
 
 ##### Image Transformation Using Histogram Equalization
-Both when training the classifier and when making predictions, before entering the actualy feature extraction loop, 
-I first perform some simple preprocessing using my pet tehcnique: histogram normalization of the Y channel after first 
-converting the images to `YUV` color space, and then converting them back to grayscale. This method is performed with 
+
+Both when training the classifier and when making predictions, before entering the actual feature extraction loop, 
+I first perform some simple preprocessing using my pet technique: histogram normalization of the Y channel after first 
+converting the images to `YUV` color space, and then converting them back to `RGB`. This method is performed with 
 the aim of enhancing contrast in the images. Below is an example of this method. 
 
 
 ![][]
 
-I also experimented with other tehcniques such as normalizing the saturation channel after a HLS transformation, 
+I also experimented with other techniques such as normalizing the saturation channel after a HLS transformation, 
 and also some adaptive smoothing methods to get rid of noise in the images. However, especially the smoothing seemed 
 like a suboptimal strategy as our images are rather low in pixel resolution and smoothing further blurs the 
 valuable car pixels. I hence decided to go forward using just Y channel normalization. 
+
+**An important note concerning training data normalization**
+
+After a long period of trial and error, I realized something what was crucial to coming up with a functional pipeline: 
+ 
+_Even though the `Y` channel normalization is a functional and useful technique, it must be properly applied
+especially when the images in question only span a small area of the real world, and hence also a small range 
+of luminosity (and other) values. Applied on individual small images (such as my training set), the results are 
+suboptimal. The twist that helped me greatly improve the detection results was the the application of this 
+normalization technique on an image formed by concatenating a greater batch of the training images together
+so as to have more variability in the normalized image. I cannot emphasize enough how important this simple
+finding was for the performance of my algorithm._
+
+To be specific, before equalizing the `Y` channel histogram, I concatenated **all** of my training images into one 
+large horizontal picture, and then after the normalization, sliced this huge image back into individual training
+images. 
+
+To demonstrate the effect, here is a single training image and the same image after a single-image `Y` channel 
+normalization: 
+
+FIXME: image
+
+Below, on the other hand, is the same image `Y` channel processed using the stacked version of the normalization. 
+
+FIXME: image
+
+##### Colorspace Conversion
+
+Even though the color space conversion introduced in the labs preceding the project is performed as part of the feature 
+extraction pipeline, I think it lies conceptually more in the preprocessing domain. My experiments with color spaces
+indicated that `YCrCrCb` was a strong candidate and that is what  I ended up using. Below are again (luminosity 
+normalized) original image and the individual color channels after a `YCrCb` conversion: 
+
+FIXME: image
 
 ##### Augmenting the Data with Examples From the Project Video 
 
@@ -221,11 +274,8 @@ def convert_color(img, conv="RBG"):
 ```
 
 This way, I can just specify e.g. `YCrCb` or `HLS` and do not neeed to remember the full CV2 colospace specifiers. 
+The choice of color space was already discussed above in the preprocessing section. 
 
-Below is an image first in RBG, then its each channel displayer after a conversion to the `HLS` color space. 
-
-For the final submission, I ended up converting the images into the `YCrCb` color space purely because the 
-results just seemed better than using the other color spaces. 
 
 #### Feature extraction
 
@@ -255,7 +305,6 @@ def bin_spatial(img, size=(32, 32)):
     color2 = cv2.resize(img[:, :, 1], size).ravel()
     color3 = cv2.resize(img[:, :, 2], size).ravel()
     return np.hstack((color1, color2, color3))
-The 
 ```
 
 FIXME: Below is an example of the spatial feature vector of an image, this time calculated for an `RGB` image.
@@ -284,7 +333,7 @@ portions of the video.
 
 The color histogram feature vector used in this project is computed using the following code. 
 
- ```python
+```python
 def color_hist(image, nbins=32, bins_range=(0, 256)):
     """Compute the color histogram of a 3-channel image
     
@@ -394,7 +443,9 @@ of the image. This was done to prevent spurious matches outside of the lane of i
 
 #### Training the classifier
 
-I briefly tried experimenting with different classifiers, as the [sklean comparison charts](www.fi) indicated some
+I briefly tried experimenting with different classifiers, as the 
+[sklean comparison charts](http://scikit-learn.org/stable/auto_examples/classification/plot_classifier_comparison.html) 
+indicated some
 methods other than the LinearSVM could yield more complex decision boundaries. I tried to use a RandomForestClassifier,
 but the results were not improved at least in my trials so I ended up just using the  `LinearSVC` classifier 
 of `scikit-learn` with its default parameters. So, after collecting the training data, training the classifier was 
@@ -574,10 +625,44 @@ I am not sure if I failed to really nail the parameters or is something else was
 I found the project quite challenging. So I am not quite happy with the final submission as it has probably at least 
 the following shortcomings. 
 
-* The pipeline is way too slow. It takes several seconds in my laptop to process each frame. This could be somewhat 
-  mitigated by using the simpler version of the aggregate heatmap method I use for stabilization purposes, but then 
+* The pipeline is way too slow. Using the detection count enhanced aggregated heatmap, It takes several seconds in my 
+  laptop to process each frame. This is somewhat mitigated by using the simpler version of the aggregate heatmap method, 
   as well as reducing the number of scales used for scanning or images to scan. Then again, this also leads to 
   decreased detection performance. 
+* I also suspect that the detection behavior (parameters thresholds etc.) are now overfit for this particular 
+  video and would perform poorly if e.g. the lightness of the video were much different. 
   
-*   
+However, I think there are also things I am happy with, or that were at least steps in the right direction:  
 
+* The method of stacking the training images together for `Y` channel normalization. This had a dramatic 
+  positive effect on detection performance. 
+* I also think the heatmap normalization method I ended up using has some potential to it. It is not perfect for 
+  this submission and it may lack some major insights that would make such processing useful, but anyhow 
+  I think this method of weight-averaged heatmaps has great potential to emphasize "long-term detections" and 
+  discard spurious false positives without too much code or involved logic. This is also something I would like to 
+  investigate further, also from a mathematical point of view. 
+* Even though I had to rush with the sumission and the repository structure is hence not properly finished, I think 
+  the modularized structure (combined with revised pieces from my previous projects) would make a decent start 
+  for a bit more general video processing toolset. I would be great to have time to really structure everything 
+  nicely and have everything generic enough to be able to perform various kinds of video and image processing 
+  and feature extraction tasks from a single repository using more or less plug and play methods. 
+
+Things I would have liked to investigate but did not have time for: 
+
+* This project sparked my interest in keeping track of vehicles over frames, and from a more generic perspective, 
+  of following the paths of different objects over time and observing / detecting how these objects may seemingly 
+  merge (when overlapping) and, after merges, how they can be identified again. Specifically, even though 
+  out of scope of this particular project, being able to track, say, a particular object of interest in situations
+  where it may overlap with similar objects would be an interesting dilemma to research. 
+* In a similar fashion this made me think of lane line "detections" (or rather predictions) when they are partly 
+  occluded by vehicles or other objects. There is an application of this I would also like to look into:  
+  - The vehicle search would be much more efficient if one had a reasonable estimate of where the road edges are. 
+    However, this becomes kind of a chicken-and-egg situation when vehicles occlude parts of the edges and hence 
+    prevent reliable edge detection.
+* Also, I hope at some point to be able to investigate any performance improvements that might be possible with this
+  algorithm. There is quite a bit of Numpy array manipulations going on, and I suspect at least moderate improvements
+  could be achieved by just being more careful not to introduce superfluous matrices. Also, there may be 
+  room in the code to perform more of processing in a single pass. I suspect the feature extraction part of the code 
+  could all be quite easily done for the whole of the area of interest simultaneously, and then for the 
+  candidate "vehicle" windows, one could then just pick part of the precomputed feature matrix. 
+* Another rather easy   

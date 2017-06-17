@@ -5,7 +5,7 @@ from matplotlib import pyplot as plt
 from unit_tests import TEST_IMG_DIR
 from copy import deepcopy
 import os
-from carnd_vehicle_detection import EXTRACT_PARAMS
+from carnd_vehicle_detection import DEFAULT_EXTRACT_PARAMS
 from carnd_vehicle_detection.preprocess import single_img_features, extract_prediction_features, extract_global_hog_features, convert_color
 from carnd_vehicle_detection.visualize import one_by_two_plot
 from carnd_vehicle_detection.traverse_image import get_global_hog_features, get_image_hog_features, \
@@ -35,12 +35,12 @@ def visualize_feature_vectors():
     manually."""
 
     # Extract and scale the params for non-scaled windows
-    features_sky = SCALER.transform(np.ravel(single_img_features(SUBIMAGE_SKY_64_64, **EXTRACT_PARAMS)))
-    features_road = SCALER.transform(np.ravel(single_img_features(SUBIMAGE_ROAD_64_64, **EXTRACT_PARAMS)))
-    features_road_2 = SCALER.transform(np.ravel(single_img_features(SUBIMAGE_ROAD_2_64_64, **EXTRACT_PARAMS)))
+    features_sky = SCALER.transform(np.ravel(single_img_features(SUBIMAGE_SKY_64_64, **DEFAULT_EXTRACT_PARAMS)))
+    features_road = SCALER.transform(np.ravel(single_img_features(SUBIMAGE_ROAD_64_64, **DEFAULT_EXTRACT_PARAMS)))
+    features_road_2 = SCALER.transform(np.ravel(single_img_features(SUBIMAGE_ROAD_2_64_64, **DEFAULT_EXTRACT_PARAMS)))
 
     # Extract and scale params for 1.5 scaled windows
-    extract_params = deepcopy(EXTRACT_PARAMS)
+    extract_params = deepcopy(DEFAULT_EXTRACT_PARAMS)
     extract_params['pix_per_cell'] = 12
     features_road_scaled = SCALER.transform(np.ravel(single_img_features(SUBIMAGE_ROAD_SCALED, **extract_params)))
     features_road_scaled_2 = SCALER.transform(np.ravel(single_img_features(SUBIMAGE_ROAD_SCALED_2, **extract_params)))
