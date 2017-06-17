@@ -20,5 +20,5 @@ class AggregatedHeatmap:
         return cv2.filter2D(heatmap, -1, SMOOTHING_KERNEL)
 
     def smoothed_heatmap(self):
-        return np.average(self.smoothed_heatmaps, 0, [50, 40, 30, 28, 14, 10, 8])  # \
-               # * np.apply_along_axis(np.count_nonzero, 0, self.smoothed_heatmaps)
+        return np.average(self.smoothed_heatmaps, 0, [50, 40, 30, 25, 25, 20, 20])  \
+               * np.apply_along_axis(np.count_nonzero, 0, self.smoothed_heatmaps)
