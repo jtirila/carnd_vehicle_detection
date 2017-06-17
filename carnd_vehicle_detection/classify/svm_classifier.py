@@ -2,12 +2,15 @@ import os
 import pickle
 from sklearn.metrics import accuracy_score
 from sklearn.preprocessing import StandardScaler
-from sklearn.svm import LinearSVC
+from sklearn.svm import LinearSVC as Clf
+# from sklearn.ensemble import RandomForestClassifier as Clf
 
 import matplotlib.pyplot as plt
 
 from carnd_vehicle_detection import ROOT_DIR
-from carnd_vehicle_detection.preprocess import single_img_features, read_training_data, normalize_luminosity
+from carnd_vehicle_detection.preprocess import single_img_features, read_training_data, normalize_luminosity, \
+    bilateral_filter, convert_color
+
 
 DEFAULT_CLASSIFIER_SAVE_PATH = os.path.join(ROOT_DIR, 'svm_classifier.p')
 
@@ -42,10 +45,16 @@ def get_classifier(classifier_path=None, classifier_save_path=DEFAULT_CLASSIFIER
     else:
         if None in (features_train, labels_train, features_valid, labels_valid):
             features_train, features_valid, labels_train, labels_valid = read_training_data()
+        # examples = [convert_color(normalize_luminosity(img), conv="YCrCb")
+        #                             for img in features_train[:10]]
+        # for img in examples:
+        #     plt.imshow(img[:, :, 0], cmap='gray')
+        #     plt.show()
         extracted_features_train = [single_img_features(normalize_luminosity(img), **extract_features_dict)
                                     for img in features_train]
         extracted_features_valid = [single_img_features(normalize_luminosity(img), **extract_features_dict)
                                     for img in features_valid]
+
         scaler = StandardScaler()
         scaler.fit(extracted_features_train)
         scaled_features_train = scaler.transform(extracted_features_train)
@@ -73,7 +82,7 @@ def train_classifier(features_train, labels_train, features_valid, labels_valid)
            and ones
     :return: A two-tuple containing the classifier object and the accuracy score (float)"""
 
-    svc = LinearSVC()
+    svc = Clf()
     svc.fit(features_train, labels_train)
     pred = svc.predict(features_valid)
     score = accuracy_score(labels_valid, pred)

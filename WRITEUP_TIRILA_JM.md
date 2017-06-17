@@ -10,48 +10,57 @@ For this project, I decided to use a conventional Python project hierarchy, with
 into a tree of directories and source code files grouped together according to related functionality. The 
 structure of the project is a follows (omitting parts not essential fot this illustration): 
 
-#### Hierarchy of packages and modules
+#### Hierarchy of packages and modules relevant to the submission
+
+Note: the repository contains also files that are unused in the code for this submission. As of now, the ones listed 
+below actually participate in processing the video.
 ```
 |── README.md
+│── detect_vehicles.py
 ├── WRITEUP_TIRILA_JM.md
 ├── carnd_vehicle_detection
 │   ├── __init__.py
 │   ├── classify
 │   │   └── svm_classifier.py
-│   ├── detect_vehicles.py
-│   ├── image_transformations
-│   │   ├── __init__.py
-│   │   └── hog_transform.py
-│   ├── image_traversal
-│   │   ├── __init__.py
-│   │   └── sliding_windows.py
-│   └── preprocessing
-│       ├── __init__.py
-│       ├── extract_features.py
-│       └── read_classification_training_data.py
+│   ├── mask 
+│   │   └── heatmap.py
+│   ├── models
+│   │   └── aggregated_heatmap.py
+│   ├── preprocess
+│   │   ├── __init__.py
+│   │   ├── bin_spatial.py
+│   │   ├── color_convert.py
+│   │   ├── color_histogram.py
+│   │   ├── extract_features.py
+│   │   ├── hog_transform.py
+│   │   └── read_classification_training_data.py
+│   ├── traverse_image 
+│   │   ├── __init__.py
+│   │   ├── bin_spatial.py
+│   │   ├── find_cars.py
 ├── images
+
 ├── project_video.mp4
 └── unit_tests
 ```
 
 The top-level `carnd_vehicle_detection` directory acts as a container for everything, including documentation 
-(readme, writeup) and the included assets (video). A subdirectory of the same name contains just 
-the Python code. 
+(readme, writeup). The image and video assets needed to run the code are **not** included in the repository. 
+A subdirectory also named `carnd_vehicle_detection` contains just the Python code. 
 
-The repository contains code files not used in the actual submitted processing. This is indicated in the 
-comments. The most important files the reviewers should pay attention to are `detect_vehicles.py` and 
-`traverse_image/search_windows.py`. The rest mainly implement thin wrappers around OpenCV image processing
-functions, or SkLearn functions,a nd the important bits are reproduced in this writeup. Of course, one can also 
-follow the code to find the code that is actually executed. 
+The most important files the reviewers should pay attention to are `detect_vehicles.py` and 
+`traverse_image/find_cars.py`. The rest mainly implement thin wrappers around OpenCV image processing
+functions, or SkLearn functions,a nd the important bits are reproduced in this writeup. They are listed 
+above anyhow. 
 
-**When mentioning code file paths in this writeup, the root of reference is always the innermost 
-`carnd_vehicle_detection` directory.**
+**When mentioning code file paths in this writeup, the root of reference is the innermost 
+`carnd_vehicle_detection` directory by default. Some references are made to file outside the code 
+directory and this is explicitly mentioned in those cases.**
 
 It should be noted that I was a little bit too ambitious about the project structure, and the attempt to 
 basically restructure everything ended up taking several days of debugging and refactoring, only to finally 
 basically come back to something rather close to the example code. Anyhow, it was a nice learning experience 
 both in computer vision/machine learning and managing complexity in a software project. 
-
 
 #### Unit tests
 
@@ -133,11 +142,6 @@ By default, the processing pipeline saves the classifier in a default location, 
 
 Once the script is done, by default is has produced a video called `transformed.mp4` in the top level directory.
 
-##### Training images
-
-You will need a set of both vehicle and non-vehicle images to train the classifier. These images are 
-not included in the repository. The easiest way is to place the images as follows, relative to the 
-top level of the repository. 
 
 ## The project 
 
@@ -151,21 +155,161 @@ top level of the repository.
 
 ### Overview of my solution in terms of the rubric points 
 
+#### Data Preprocessing
+
+##### Image Transformation Using Histogram Equalization
+Both when training the classifier and when making predictions, before entering the actualy feature extraction loop, 
+I first perform some simple preprocessing using my pet tehcnique: histogram normalization of the Y channel after first 
+converting the images to `YUV` color space, and then converting them back to grayscale. This method is performed with 
+the aim of enhancing contrast in the images. Below is an example of this method. 
 
 
-#### First point
+![][]
 
-#### Data preprocessing
+I also experimented with other tehcniques such as normalizing the saturation channel after a HLS transformation, 
+and also some adaptive smoothing methods to get rid of noise in the images. However, especially the smoothing seemed 
+like a suboptimal strategy as our images are rather low in pixel resolution and smoothing further blurs the 
+valuable car pixels. I hence decided to go forward using just Y channel normalization. 
+
+##### Augmenting the Data with Examples From the Project Video 
+
+In addition to the training files provided for the project, I also decided to augment the data set by 
+taking screenshots of the project video, multiplying them adding random rotations and scalings and then 
+adding these to the training data set. 
+
+The code that produces the augmentations was a one-time script. It can be found at 
+`script/one_off_scripts/augment_data.py`. There is lot of routine filename changing included (to get rid of
+spaces in filenames) but the most important part that introduced the rotations and scalings is included below.  
+
+```python
+def save_rotated_scaled_versions(filenames, images, rounds):
+    for round in range(rounds):
+
+        rotation_angles = [18 * (random() - 0.5) for _ in range(len(images))]
+        scale_coeffs = [1.1 + 0.2 * random() for _ in range(len(images))]
+
+        for ind, img_and_filename in enumerate(zip(images, filenames)):
+            img, filename = img_and_filename
+            print("round {}, ind {}, filename {}".format(round, ind, filename))
+            matr = cv2.getRotationMatrix2D((32, 32), rotation_angles[ind], scale_coeffs[ind])
+            new_image = cv2.warpAffine(img, matr, (64, 64))
+            new_image_filename = index_filename(filename, "round_{}_image_{}".format(round, ind))
+            # print(new_image_filename)
+            mpimg.imsave(new_image_filename, new_image[:, :, :3])
+
+```
+
+##### Color Space
+
+As part of the pipeline, the images can be converted into another color space before further feature 
+extraction. To simplify the target colorspace perameters, I wrote a wrapper script for the OpenCV function: 
+
+```python
+def convert_color(img, conv="RBG"):
+    """Convert color to the specified color space.
+    
+    :param img: The original image, assumed to be in RGB
+    :param conv: A string containing the new colorspace name, accepted strings are HSV, HLS; YCrCb, FIXME what else
+    
+    :return: the transformed image"""
+    if conv != 'RGB':
+        color_specifier = "COLOR_RGB2{}".format(conv.upper())
+        feature_image = cv2.cvtColor(img, getattr(cv2, color_specifier))
+    else:
+        feature_image = np.copy(img)
+    return feature_image
+```
+
+This way, I can just specify e.g. `YCrCb` or `HLS` and do not neeed to remember the full CV2 colospace specifiers. 
+
+Below is an image first in RBG, then its each channel displayer after a conversion to the `HLS` color space. 
+
+For the final submission, I ended up converting the images into the `YCrCb` color space purely because the 
+results just seemed better than using the other color spaces. 
 
 #### Feature extraction
 
-##### FIXME: some color histogram stuff maybe
-##### Extracting the HOG features, the first attempt
+Feature extraction is performed using the methods introduced in the labs preceding the project.  
+
+##### Spatial features
+
+The spatial features vector is just a compressed version of the original image. While the main characteristics of e.g.  
+a vehicle are still preserved in a, say, 32x32 pixel image, I doubt the usefulness of such a feature vector
+depends heavily on the type of classifier used. As I ended up using an SVM classifier for the project,  
+I am not really sure if any linear decision surface would be able to use the compressed version of an 
+image very efficiently.
+
+If I were to use a convolutional neural network, for example, the situation might be different, though. 
+
+Below is the code used for extracting the spatial features.  
+
+```python
+def bin_spatial(img, size=(32, 32)):
+    """Just resize an image and return the color values as a 1-dimensional vector
+    
+    :param img: the original image
+    :param size: A two-tuple containing the new size
+    :return: a 1-dim feature vector"""
+
+    color1 = cv2.resize(img[:, :, 0], size).ravel()
+    color2 = cv2.resize(img[:, :, 1], size).ravel()
+    color3 = cv2.resize(img[:, :, 2], size).ravel()
+    return np.hstack((color1, color2, color3))
+The 
+```
+
+FIXME: Below is an example of the spatial feature vector of an image, this time calculated for an `RGB` image.
+
+##### Color Histogram 
+
+As for the color histogram, I think its usefulness in a SVM classifier context may be a bit better justified 
+than that of the spatial feature vector. 
+
+Color histogram nicely captures the relative count of different color value ranges in an image, on a 
+per-channel basis. The value range is divided into bins of equal size each bin is subsequently represented 
+by how many of all the color values in the input fall into the bin. 
+
+This is especially true for alternative color spaces that 
+are probably better able to distinguish between saturated "artificial" colors used in vehicles, and 
+the more washed out background of a road environment. Care should be taken though so the classifier 
+does not go totally wild in a colorful city environment. 
+
+Even for the color histograms, my findings did not suggest an immediate usefulness, but in a real-world 
+detection problem, I would probably still consider including them due to the potential effects mentioned above. 
+
+However, in conclusion regarding both the spatial and color histogram features, I had a hard time obtaining a stable 
+vehicle detection so I ended up including all of the suggested features
+anyway, hoping they would provide even a tiny bit of assistance in detecting vehicles in more challenging 
+portions of the video.  
+
+The color histogram feature vector used in this project is computed using the following code. 
+
+ ```python
+def color_hist(image, nbins=32, bins_range=(0, 256)):
+    """Compute the color histogram of a 3-channel image
+    
+    :param image: the original image
+    :param nbins: The number of histogram bins to divide the color range into
+    :param bins_range: The range of values
+    
+    :returns: The histogram values concatenated into a feature vector"""
+
+    # Compute the histogram of the color channels separately
+    channel1_hist = np.histogram(image[:,:,0], bins=nbins)
+    channel2_hist = np.histogram(image[:,:,1], bins=nbins)
+    channel3_hist = np.histogram(image[:,:,2], bins=nbins)
+    # Concatenate the histograms into a single feature vector
+    hist_features = np.concatenate((channel1_hist[0], channel2_hist[0], channel3_hist[0]))
+    return hist_features
+```
+
+FIXME: Below is an example of the color histogram of an image, using the `YCrCb` color space.
+
+##### The HOG features
 
 The histogram of oriented gradients is a nice approach to indclude some generic shape templates in the feature vector.  
 The method determines (discrete) gradient directions an magnitudes for each pixel in the image, and then bins them 
 according to the chosen cell size and blocking scheme. 
-
 
 The result is a histogram of gradient directions for each cell, 
 weighted by the magnitudes, so that the dominant gradient directions are extracted. 
@@ -198,6 +342,13 @@ reasoning makes sense, but also [this presentation on pedestrian detection](http
 suggests 8 pixels per cell and 2 cells per block should be a nice compromise. There is a slide concerning the 
 miss rates using various combinations of the parameters, and a choice of 8 and 2 yields the smallest miss rate. 
 
+FIXME: Below is an example of first the feature vector extracted using the HOG extractor for all channels in an 
+`YCrCb` image, and subsequently the visualization for the vector produced by OpenCV. 
+
+
+**A note about color space**: the project rubric requires that at this points, colorspace conversion is also discussed. 
+I included the discussion in my section on preprocessing, please refer to that section above for more information. 
+
 ###### The Relationship Between Moving Windows and HOG Features
 
 When planning my algorithm, I first tried to implement a method of my own for the window search, kind of thinking 
@@ -214,44 +365,40 @@ scales the whole frame according to the provided scale parameter, and then looks
 candidate windows of size 64x64 so the processing is quite straightforward. The only bit about this 
 that is rather convoluted is the computation of the various mapped x and y locations, step sizes etc. 
 
-##### Spatial Features an Color Histograms
+###### The Sliding Window Modifications to the Provided Example Code
 
-During the project, I experimented both with including all the three feature sets both with including all the three 
-feature sets both with including all the three feature sets both with including all the three feature sets in the 
-final feature vector, and leaving the color histogram and spatial features out. Here are some thoughts on each of 
-these feature categories and why they may not be as important for vehicle detection as the HOG features. 
+So, as mentioned above, I basically adopted the windowing scheme provided as example code. I made a
+couple of changes, though: 
 
-###### Spatial features
+**Cells per step**
 
-The spatial features vector is just a compressed version of the original image. While the main characteristics of e.g.  
-a vehicle are still preserved in a, say, 32x32 pixel image, I doubt the usefulness of such a feature vector
-depends heavily on the type of classifier used. As I ended up using an SVM classifier for the project,  
-I am not really sure if any linear decision surface would be able to use the compressed version of an 
-image very efficiently.
+For window overlap, I figured at larger scales it may be beneficial to not take too wide steps so 
+I set the `cells_per_step` variable that controls overlap to just 1 for larger windows as follows:
+  
+```python
+if scale < 1.9:
+    cells_per_step = 2 # Instead of overlap, define how many cells to step
+else:
+    cells_per_step = 1
+```  
 
-If I were to use a convolutional neural network, for example, the situation might be different, though. 
+The rationale for this choice is that I figured it is more imprtant to detect vehicles close to the camera, 
+and those vehicles would typically be bigger in scale than ones further away. 
 
-###### Color histogram
+**Area of interest also in X direction**
 
-As for the color histogram, I think its usefulness in a SVM classifier context may be a bit better justified 
-than that of the spatial feature vector. This is especially true for alternative color spaces that 
-are probably better able to distinguish between saturated "artificial" colors used in vehicles, and 
-the more washed out background of a road environment. Care should be taken though so the classifier 
-does not go totally wild in a colorful city environment. 
-
-Even for the color histograms, my findings did not suggest an immediate usefulness, but in a real-world 
-detection problem, I would probably still consider incluging them due to the potential effects mentioned above. 
-
-However, in conclusion regarding both the spatial and color histogram features, I had a hard time obtaining a stable 
-vehicle detection so I ended up including all of the suggested features
-anyway, hoping they would provide even a tiny bit of assistance in detecting vehicles in more challenging 
-portions of the video.  
+The template only cropped the image in the vertical direction. I made the changes needed to the code to also 
+be able to restrict the are scanned horizontally. This is done on a per-scale basis so that for larger scales, 
+the whole width of an image is scanned, while for smaller scales, matches are only searched closer to the center 
+of the image. This was done to prevent spurious matches outside of the lane of interest. 
 
 #### Training the classifier
 
-I did not have a chance to play around with training the classifier much, especially as some very early attempts
-seemed to produce reasonably good results. I just use the `LinearSVC` classifier of `scikit-learn` with its default 
-parameters. So, after collecting the training data, training the classifier was just a matter of running the following
+I briefly tried experimenting with different classifiers, as the [sklean comparison charts](www.fi) indicated some
+methods other than the LinearSVM could yield more complex decision boundaries. I tried to use a RandomForestClassifier,
+but the results were not improved at least in my trials so I ended up just using the  `LinearSVC` classifier 
+of `scikit-learn` with its default parameters. So, after collecting the training data, training the classifier was 
+just a matter of running the following
 two lines. 
 
 ```
@@ -263,7 +410,7 @@ This code is located at `classify/svm_classifier.py` file along with some proces
 training data ready for processing. 
 
 Using the default approach, the classifier is subsequently evaluated against a separate validation set. Using my 
-training data, the result of running 
+training data, as result of running 
 
 ```
 pred = svc.predict(features_valid)
@@ -271,12 +418,11 @@ score = accuracy_score(labels_valid, pred)
 print("Successfully trained the classifier. Accuracy on test set was {}".format(score))
 ```
 
-was typically along the lines of 
-```
-FIXME
-```
+the accuracy was typically 98-99 percent for larger feature sets and 93-94% if a shorter feature vector
+ was used (e.g. only one channel of the HOG features).
 
-so I figured the classifier as such was robust enough. 
+I figured with something around 98-99% the classifier as such was robust enough so I decided to go 
+forth with this solution. 
 
 #### The moving window search, tracking vehicles and removing false positives
 
@@ -322,7 +468,6 @@ def slide_window(img, x_start_stop=[None, None], y_start_stop=[None, None],
 However, in my submission this code is not actually used as it is replace by the `find_cars` function 
 included in the project instructions. 
 
-
 #### Tracking & False Positives
 
 To stabilize the vehicle lookup a bit, I rolled out a method of my own. To summarize, the method consists of 
@@ -349,6 +494,8 @@ heatmaps. This is done with the following aims:
 The `AggregatedHeatmap` class is reproduced entirely below: 
 
 ```python
+
+np.ones((8, 8))
 SMOOTHING_KERNEL = np.array([[0.25, 0.25], [0.25, 0.25]])
 
 class AggregatedHeatmap:
@@ -384,16 +531,53 @@ would be beneficial in terms of detection performance. My findings are at this p
 and I left this weighting scheme out of the submission as it added a lot of computational burden and the processing 
 became way too slow. Anyhow, coming up with a weighting scheme was as simple as first calculating the matrix
 ```python
-np.apply_along_axis(np.count_nonzero, 0, self.smoothed_heatmaps)
+    def smoothed_heatmap(self):
+        return np.average(self.smoothed_heatmaps, 0, [30, 28, 14, 10, 8]) \
+            * np.apply_along_axis(np.count_nonzero, 0, self.smoothed_heatmaps)
 ```
 and then multiplying the averaged counts with this matrix element-wise. 
 
- 
+This stabilizing tehcnique turned out to indeed improve the tracking. However, it came with a cost: the computational 
+demands of the algorithm were increased quite much. 
+
+I decided to go forward with this approach, however, to further investigate this idea of heatmap aggretation.  
+
+Below are images of a plain heatmap, then an aggregated heatmap produced with the method above. 
+
 ### The solution 
+
+#### Training the Model  
+
+The orchestration of processing the individual frames and saving them into a new clip is taken care of in the 
+`detect_vehicles.py` file, using `MoviePy`'s `fl_image` function. In the current form, the processing takes 
+ two and a half hours, so to use this method in any real world settings, performance increasements would be 
+ mandatory. I suspect there is a way of performing the numpy array averaging and weighting by number of nonzero 
+ elements on an axis in a single pass. 
+ 
+ #### The result
+ 
+ I uploaded the result video to YouTube. It is embedded below if you are reading a rendered version of this writeup. 
+ 
+ 
+[My output video](https://img.youtube.com/vi/YOUTUBE_VIDEO_ID_HERE/0.jpg)](https://www.youtube.com/watch?v=YOUTUBE_VIDEO_ID_HERE) 
+
+
+With the computationan demands of the heatmap aggregation step, the processing time of the video on my lapstop 
+
 
 TODO: maybe  upload the video to YouTube and include a (image) link to the video in the writeup, as 
 per https://stackoverflow.com/a/16079387
 
-
-
 ### Discussion
+
+I am not sure if I failed to really nail the parameters or is something else was a bit off, but in any case, 
+I found the project quite challenging. So I am not quite happy with the final submission as it has probably at least 
+the following shortcomings. 
+
+* The pipeline is way too slow. It takes several seconds in my laptop to process each frame. This could be somewhat 
+  mitigated by using the simpler version of the aggregate heatmap method I use for stabilization purposes, but then 
+  as well as reducing the number of scales used for scanning or images to scan. Then again, this also leads to 
+  decreased detection performance. 
+  
+*   
+

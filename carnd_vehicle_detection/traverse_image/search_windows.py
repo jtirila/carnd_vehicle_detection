@@ -6,7 +6,7 @@ from carnd_vehicle_detection.preprocess import single_img_features, get_hog_feat
 from carnd_vehicle_detection.traverse_image import all_windows_divisible_by
 
 
-def find_cars(img, ystart_stop, xstart_stop, scale, svc, X_scaler, extract_params):
+def find_cars_old(img, ystart_stop, xstart_stop, scale, svc, X_scaler, extract_params):
 
     ystart, ystop = ystart_stop
     xstart, xstop = xstart_stop
@@ -143,6 +143,7 @@ def get_global_hog_features(img, orient, pix_per_cell, cell_per_block, hog_chann
         global_hog_features = get_hog_features(img[:, :, hog_channel], orient,
                                                pix_per_cell, cell_per_block, vis=False, feature_vec=False)
     return global_hog_features
+
 
 def get_image_hog_features(global_hog_features, hog_x_start, hog_x_end, hog_y_start, hog_y_end, hog_channel):
     if hog_channel == "ALL":
