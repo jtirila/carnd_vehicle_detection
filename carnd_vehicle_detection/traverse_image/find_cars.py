@@ -50,8 +50,8 @@ def find_cars(img, ystart, ystop, xstart, xstop, scale, svc, X_scaler, color_spa
     window = 64
     nblocks_per_window = (window // pix_per_cell) - cell_per_block + 1
     # Jump around more for smaller scales, we don't need too reliable detections far away.
-    if scale < 1.9:
-        cells_per_step = 2 # Instead of overlap, define how many cells to step
+    if scale < 1.6:
+        cells_per_step = 2  # Instead of overlap, define how many cells to step
     else:
         cells_per_step = 1
 
@@ -140,21 +140,3 @@ def find_cars(img, ystart, ystop, xstart, xstop, scale, svc, X_scaler, color_spa
 
     return hot_windows
 
-# def get_fhog_features(img, orient, pix_per_cell, cell_per_block,
-#                         vis=False, feature_vec=True):
-#     # Call with two outputs if vis==True
-#     if vis == True:
-#         features, hog_image = hog(img, orientations=orient,
-#                                   pixels_per_cell=(pix_per_cell, pix_per_cell),
-#                                   cells_per_block=(cell_per_block, cell_per_block),
-#                                   transform_sqrt=False,
-#                                   visualise=vis, feature_vector=feature_vec)
-#         return features, hog_image
-#     # Otherwise call with one output
-#     else:
-#         features = hog(img, orientations=orient,
-#                        pixels_per_cell=(pix_per_cell, pix_per_cell),
-#                        cells_per_block=(cell_per_block, cell_per_block),
-#                        transform_sqrt=False,
-#                        visualise=vis, feature_vector=feature_vec)
-#         return features

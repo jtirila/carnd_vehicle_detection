@@ -11,14 +11,14 @@ from carnd_vehicle_detection.models import AggregatedHeatmap
 from carnd_vehicle_detection.traverse_image import find_cars
 from carnd_vehicle_detection.visualize import draw_labeled_bboxes
 
-# DEFAULT_INPUT_VIDEO_PATH = os.path.join(ROOT_DIR, 'project_video.mp4')
+DEFAULT_INPUT_VIDEO_PATH = os.path.join(ROOT_DIR, 'project_video.mp4')
 # DEFAULT_INPUT_VIDEO_PATH = os.path.join(ROOT_DIR, 'unit_tests', 'test_videos', 'subclip_0__15.mp4')
 # DEFAULT_INPUT_VIDEO_PATH = os.path.join(ROOT_DIR, 'unit_tests', 'test_videos', 'subclip_15__20.mp4')
 # DEFAULT_INPUT_VIDEO_PATH = os.path.join(ROOT_DIR, 'unit_tests', 'test_videos', 'subclip_20__25.mp4')
 # DEFAULT_INPUT_VIDEO_PATH = os.path.join(ROOT_DIR, 'unit_tests', 'test_videos', 'subclip_20__35.mp4')
 # DEFAULT_INPUT_VIDEO_PATH = os.path.join(ROOT_DIR, 'unit_tests', 'test_videos', 'subclip_23__25.mp4')
 # DEFAULT_INPUT_VIDEO_PATH = os.path.join(ROOT_DIR, 'unit_tests', 'test_videos', 'subclip_15__30.mp4')
-DEFAULT_INPUT_VIDEO_PATH = os.path.join(ROOT_DIR, 'unit_tests', 'test_videos', 'subclip_35__36.mp4')
+# DEFAULT_INPUT_VIDEO_PATH = os.path.join(ROOT_DIR, 'unit_tests', 'test_videos', 'subclip_35__36.mp4')
 # DEFAULT_INPUT_VIDEO_PATH = os.path.join(ROOT_DIR, 'unit_tests', 'test_videos', 'subclip_35__35_3.mp4')
 
 _DEFAULT_VIDEO_OUTPUT_PATH = os.path.join(ROOT_DIR, 'transformed.mp4')
@@ -60,7 +60,7 @@ _DEFAULT_X_STARTS_STOPS_PER_SCALE = {
     2.5: [150, None],
     3: [150, None]}
 
-_DEFAULT_SCALES = (1, 1.4, 1.7, 2, 2.5)
+_DEFAULT_SCALES = (1, 1.5, 1.7, 2)
 
 
 def detect_vehicles(input_video_path=DEFAULT_INPUT_VIDEO_PATH, output_path=_DEFAULT_VIDEO_OUTPUT_PATH,
@@ -131,12 +131,12 @@ def search_for_cars(raw_image, classifier, scaler, aggregated_heatmp, scales=_DE
             find_cars(image, *y_start_stop, *x_start_stop, scale, classifier, scaler, **extract_params)
         )
     high_confidence_labels, low_confidence_labels = add_labeled_heatmap(image, hot_windows, aggregated_heatmp)
-    return draw_labeled_bboxes(draw_img, (high_confidence_labels, low_confidence_labels))
+    return draw_labeled_bboxes(draw_img, (high_confidence_labels, ))  # low_confidence_labels
 
 
 if __name__ == "__main__":
     # detect_vehicles(previous_classifier_path=None, output_path="trans.mp4")
     # detect_vehicles(previous_classifier_path=_DEFAULT_CLASSIFIER_PATH, output_path="trans.mp4")
-    detect_vehicles(previous_classifier_path=_DEFAULT_CLASSIFIER_PATH)
-    # detect_vehicles(previous_classifier_path=None)
+    # detect_vehicles(previous_classifier_path=_DEFAULT_CLASSIFIER_PATH)
+    detect_vehicles(previous_classifier_path=None)
 

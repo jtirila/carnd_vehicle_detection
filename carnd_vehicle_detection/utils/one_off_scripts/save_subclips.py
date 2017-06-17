@@ -13,4 +13,4 @@ def save_subclip(video_path=DEFAULT_INPUT_VIDEO_PATH, start=0, end=10):
                             audio=False)
 
 if __name__ == "__main__":
-    save_subclip(start=35, end=36)
+    save_subclip(start=15, end=30)

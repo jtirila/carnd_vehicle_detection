@@ -9,11 +9,11 @@ def add_labeled_heatmap(image, hot_windows, aggregated_heatmap):
     heat = _add_heat(heat, hot_windows)
     heatmap = np.clip(heat, 0, 255)
     aggregated_heatmap.process_new_heatmap(heatmap)
-    high_confidence_heatmap = _apply_threshold(aggregated_heatmap.smoothed_heatmap(), 16)
-    low_confidence_heatmap = _apply_threshold(aggregated_heatmap.smoothed_heatmap(), 2)
+    high_confidence_heatmap = _apply_threshold(aggregated_heatmap.smoothed_heatmap(), 32)
+    # low_confidence_heatmap = _apply_threshold(aggregated_heatmap.smoothed_heatmap(), 2)
     high_confidence_labels = label(high_confidence_heatmap)
-    low_confidence_labels = label(low_confidence_heatmap)
-    return high_confidence_labels, low_confidence_labels
+    # low_confidence_labels = label(low_confidence_heatmap)
+    return high_confidence_labels, None
 
 
 def _add_heat(heatmap, bbox_list):

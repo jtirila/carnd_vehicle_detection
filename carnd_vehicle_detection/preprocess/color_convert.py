@@ -31,9 +31,9 @@ def normalize_luminosity(img):
 
     # convert the YUV image back to RGB format
     color_image = cv2.cvtColor(img_yuv, cv2.COLOR_YUV2RGB)
-    hls_image = cv2.cvtColor(color_image, cv2.COLOR_RGB2HLS)
-    hls_image[:, :, 2] = cv2.equalizeHist(hls_image[:, :, 2])
-    color_image = cv2.cvtColor(hls_image, cv2.COLOR_HLS2RGB)
+    # hls_image = cv2.cvtColor(color_image, cv2.COLOR_RGB2HLS)
+    # hls_image[:, :, 2] = cv2.equalizeHist(hls_image[:, :, 2])
+    # color_image = cv2.cvtColor(hls_image, cv2.COLOR_HLS2RGB)
     # color_image[s_channel < 100] = 30
     return color_image
 
