@@ -2,22 +2,32 @@
 
 **Writeup by J-M Tirilä**
 
-(Work in progress.)
+This document documents what I did for P5 of term1 of the Self Driving Car Engineer Nanodegree Program of Udacity. 
 
 [//]: # (Image References)
 
-[training_sample_img]: ./writeup_images/training_sample_img.png "An example training image"
-[per_sample_y_channel_compaison]: ./writeup_images/fixme "The effect of per-image Y channel normalization"
-[stacked_y_channel_compaison]: ./writeup_images/fixme "The effect of Y channel normalization on the stack of images"
-[ycrcb_conversion_ch0]: ./writeup_images/fixme "YCrCb conversion, first channel"
-[ycrcb_conversion_ch1]: ./writeup_images/fixme "YCrCb conversion, second channel"
-[ycrcb_conversion_ch2]: ./writeup_images/fixme "YCrCb conversion, third channel"
-[augmentation_example_images]: ./writeup_images/fixme "Some example images from the augmenting set"
-[image4]: ./examples/placeholder.png "Traffic Sign 1"
-[image5]: ./examples/placeholder.png "Traffic Sign 2"
-[image6]: ./examples/placeholder.png "Traffic Sign 3"
-[image7]: ./examples/placeholder.png "Traffic Sign 4"
-[image8]: ./examples/placeholder.png "Traffic Sign 5"
+[training_sample_img]: ./output_images/training_sample_img.png "An example training image"
+[per_sample_y_channel_compaison]: ./output_images/fixme "The effect of per-image Y channel normalization"
+[stacked_y_channel_comparison]: ./output_images/fixme "The effect of Y channel normalization on the stack of images"
+[image_to_scan]: ./output_images/image_to_scan.png "The image to scan"
+[candidate_image]: ./output_images/candidate_image.png "Candidate image"
+[candidate_image_ch0]: ./output_images/candidate_image_channel_0.png "YCrCb conversion, first channel"
+[candidate_image_ch1]: ./output_images/candidate_image_channel_1.png "YCrCb conversion, second channel"
+[candidate_image_ch2]: ./output_images/candidate_image_channel_2.png "YCrCb conversion, third channel"
+[image_to_scan]: ./output_images/image_to_scan.png "Another candidate image"
+[another_candidate_image]: ./output_images/another_candidate_image.png "Another candidate image"
+[another_candidate_image_features]: ./output_images/another_candidate_image_features.png "Another candidate image, features"
+[yet_another_candidate_image]: ./output_images/yet_another_candidate_image.png "Another candidate image"
+[yet_another_candidate_image_spatial_features]: ./output_images/yet_another_candidate_image_spatial_features.png "Another candidate image, spatial features"
+[yet_another_candidate_image_2]: ./output_images/yet_another_candidate_image_2.png "Another candidate image"
+[yet_another_candidate_image_2_hist_features]: ./output_images/yet_another_candidate_image_2_hist_features.png "Another candidate image, hist features"
+[augmentation_example_images]: ./output_images/some_augmentation_images.png "Some example images from the augmenting set"
+[car_training_img]: ./output_images/car_training_image.png "Traffic Sign 1"
+[car_training_img_hog_ch0]: ./output_images/car_training_image_hog_ch0.png "Traffic Sign 2"
+[raw_detection]: ./output_images/raw_detection.png "All detected boxes (for a single scale)"
+[training_preprocessing_average]: ./output_images/training_preprocessing_average.png "An average preprocessing result"
+[training_preprocessing_improved]: ./output_images/training_preprocessing_improved.png "A preprocessing result where batch seems to help in comparison to raw image"
+[training_preprocessing_batch_advantage]: ./output_images/training_preprocessing_batch_advantage.png "A preprocessing result where batch seems to help in comparison to single image preprocessing"
 
 
 ## Notes on the submission
@@ -57,7 +67,9 @@ below actually participate in processing the video.
 │   │   ├── bin_spatial.py
 │   │   ├── find_cars.py
 ├── images
-
+│   ├── vehicles 
+│   └── nonvehicles 
+├── output_images
 ├── project_video.mp4
 └── unit_tests
 ```
@@ -123,13 +135,14 @@ functionality resides outside of the test directory.**
 
 #### Launching the vehicle detector
 
-With the prerequisities covered, you can simply run the vehicle detector script by 
+With the prerequisities covered, you can simply run the vehicle detector script by entering the top level directory 
+and issuing
 
 ```
-sh detect_vehicles.py
+python -m carnd_vehicle_detection.detect_vehicles
 ```
 
-in the directory where the file is located, or by launching the Python interpreter and issuing the following commands. 
+or by launching the Python interpreter and issuing the following commands. 
 
 ```python
 from carnd_vehicle_detection.detect_vehicles import detect_vehicles
@@ -165,13 +178,24 @@ Once the script is done, by default is has produced a video called `transformed.
 
 ### Goals
 
+The goals / steps of this project are the following:
 
+* Perform a Histogram of Oriented Gradients (HOG) feature extraction on a labeled training set of images and train a 
+  classifier Linear SVM classifier
+* Optionally, you can also apply a color transform and append binned color features, as well as histograms of color, 
+  to your HOG feature vector. 
+* Implement a sliding-window technique and use your trained classifier to search for vehicles in images.
+* Run your pipeline on a video stream  
+  and create a heat map of recurring detections frame by frame to reject outliers and follow detected vehicles
+* Estimate a bounding box for vehicles detected.
 
 ### My approach
 
+In addition to the hints given in the project instructions, I decided to try adding some colorspace 
+preprocessing, augment the training data set with some generated images, and implement a 
+custom method for stabilizing the vehicle detections across frames.  
 
-
-### Overview of my solution in terms of the rubric points 
+### Overview of my Solution in Terms of the Rubric Points 
 
 #### Data Preprocessing
 
@@ -180,10 +204,9 @@ Once the script is done, by default is has produced a video called `transformed.
 Both when training the classifier and when making predictions, before entering the actual feature extraction loop, 
 I first perform some simple preprocessing using my pet technique: histogram normalization of the Y channel after first 
 converting the images to `YUV` color space, and then converting them back to `RGB`. This method is performed with 
-the aim of enhancing contrast in the images. Below is an example of this method. 
+the aim of enhancing contrast in the images. Below is an example image after this method applied.  
 
-
-![][]
+![image_to_scan][image_to_scan]
 
 I also experimented with other techniques such as normalizing the saturation channel after a HLS transformation, 
 and also some adaptive smoothing methods to get rid of noise in the images. However, especially the smoothing seemed 
@@ -206,14 +229,15 @@ To be specific, before equalizing the `Y` channel histogram, I concatenated **al
 large horizontal picture, and then after the normalization, sliced this huge image back into individual training
 images. 
 
-To demonstrate the effect, here is a single training image and the same image after a single-image `Y` channel 
-normalization: 
+To demonstrate the effect, here are a few triplets with the original training image on the left, single-image 
+`Y` channel histogram normalized image in the middle, and the batch normalized image on the right. In all of 
+these images, the batch preprocessed image arguably outperforms the per-image preprocessed version, 
+and at least in the last one some improvement can also be seen in terms of contrast, compared to the original 
+image. 
 
-FIXME: image
-
-Below, on the other hand, is the same image `Y` channel processed using the stacked version of the normalization. 
-
-FIXME: image
+![A normal preprocessing result][training_preprocessing_average] 
+![Batch preprocessing has an edge over per-image preprocessing][training_preprocessing_batch_advantage]
+![Preprocessed slightly better than original][training_preprocessing_improved]
 
 ##### Colorspace Conversion
 
@@ -222,7 +246,11 @@ extraction pipeline, I think it lies conceptually more in the preprocessing doma
 indicated that `YCrCrCb` was a strong candidate and that is what  I ended up using. Below are again (luminosity 
 normalized) original image and the individual color channels after a `YCrCb` conversion: 
 
-FIXME: image
+![candidate_image][candidate_image]
+![candidate_image_ch0][candidate_image_ch0]
+![candidate_image_ch1][candidate_image_ch1]
+![candidate_image_ch2][candidate_image_ch2]
+
 
 ##### Augmenting the Data with Examples From the Project Video 
 
@@ -307,7 +335,18 @@ def bin_spatial(img, size=(32, 32)):
     return np.hstack((color1, color2, color3))
 ```
 
-FIXME: Below is an example of the spatial feature vector of an image, this time calculated for an `RGB` image.
+Below The goals / steps of this project are the following:
+
+* Perform a Histogram of Oriented Gradients (HOG) feature extraction on a labeled training set of images and train a classifier Linear SVM classifier
+* Optionally, you can also apply a color transform and append binned color features, as well as histograms of color, to your HOG feature vector. 
+* Note: for those first two steps don't forget to normalize your features and randomize a selection for training and testing.
+* Implement a sliding-window technique and use your trained classifier to search for vehicles in images.
+* Run your pipeline on a video stream (start with the test_video.mp4 and later implement on full project_video.mp4) and create a heat map of recurring detections frame by frame to reject outliers and follow detected vehicles.
+* Estimate a bounding box for vehicles detected.is an example of another candidate image together with its spatial feature vector 
+(32x32x3 = 3072 pixels, using the `YCrCb` color space). 
+
+![yet_another_candidate_image][yet_another_candidate_image]
+![yet_another_candidate_image_spatial_features][yet_another_candidate_image_spatial_features]
 
 ##### Color Histogram 
 
@@ -326,12 +365,15 @@ does not go totally wild in a colorful city environment.
 Even for the color histograms, my findings did not suggest an immediate usefulness, but in a real-world 
 detection problem, I would probably still consider including them due to the potential effects mentioned above. 
 
-However, in conclusion regarding both the spatial and color histogram features, I had a hard time obtaining a stable 
-vehicle detection so I ended up including all of the suggested features
-anyway, hoping they would provide even a tiny bit of assistance in detecting vehicles in more challenging 
-portions of the video.  
+However, in conclusion regarding both the spatial and color histogram features, even though I had a hard time obtaining 
+a stable vehicle detection and at times thought I should use all available features, _I ended up not using 
+color histogram features in the final submission_. This is at least in part due to 
+the relatively great amount of time spent calculating the histograms, according to a cProfile run
+I performed to find out what was taking so long in my algorithm. 
 
-The color histogram feature vector used in this project is computed using the following code. 
+The spatial features were used with size parameter `(32, 32)`.
+
+Anyhow, the color histogram feature vector used in this project is computed using the following code. 
 
 ```python
 def color_hist(image, nbins=32, bins_range=(0, 256)):
@@ -352,7 +394,11 @@ def color_hist(image, nbins=32, bins_range=(0, 256)):
     return hist_features
 ```
 
-FIXME: Below is an example of the color histogram of an image, using the `YCrCb` color space.
+Below is first yet another candidate image together with its histogram feature vector 
+(using 16 bins per channel and the `YCrCb` color space).
+
+![yet_another_candidate_image_2][yet_another_candidate_image_2]
+![yet_another_candidate_image_2_hist_features][yet_another_candidate_image_2_hist_features]
 
 ##### The HOG features
 
@@ -362,9 +408,11 @@ according to the chosen cell size and blocking scheme.
 
 The result is a histogram of gradient directions for each cell, 
 weighted by the magnitudes, so that the dominant gradient directions are extracted. 
-This is illustrated in the image below. 
+This is illustrated in the image below, with the first figure containing the original image 
+and the second one its HOG visualization (first of the three color channels). 
 
-FIXME: include image of hog features. 
+![car_training_img][car_training_img]
+![car_training_img_hog_ch0][car_training_img_hog_ch0]
 
 The number of direction bins to use can be provided as a parameter. I had played around with different numbers
 of bins in the labs preceding the project, but did not have any systematic hunch of what works and why. 
@@ -391,8 +439,12 @@ reasoning makes sense, but also [this presentation on pedestrian detection](http
 suggests 8 pixels per cell and 2 cells per block should be a nice compromise. There is a slide concerning the 
 miss rates using various combinations of the parameters, and a choice of 8 and 2 yields the smallest miss rate. 
 
-FIXME: Below is an example of first the feature vector extracted using the HOG extractor for all channels in an 
-`YCrCb` image, and subsequently the visualization for the vector produced by OpenCV. 
+Below is an example of first the original candidate image (corresponding to a viewing window) and subsequently 
+its normalized feature vector extracted using only the HOG extractor for all channels in an 
+`YCrCb` image.
+
+![another_candidate_image][another_candidate_image]
+![another_candidate_image_features][another_candidate_image_features]
 
 
 **A note about color space**: the project rubric requires that at this points, colorspace conversion is also discussed. 
@@ -440,6 +492,20 @@ The template only cropped the image in the vertical direction. I made the change
 be able to restrict the are scanned horizontally. This is done on a per-scale basis so that for larger scales, 
 the whole width of an image is scanned, while for smaller scales, matches are only searched closer to the center 
 of the image. This was done to prevent spurious matches outside of the lane of interest. 
+
+##### Normalizing the feature vectors. 
+
+For the feature vector normalization, I used the `StandardScaler` class of `sklearn`. The code below illustrates 
+how it is used for the training features. The usage for other purposes (testing of candidate images, validation) is 
+done similarly, just omitting the first two lines.
+
+```python
+scaler = StandardScaler()
+scaler.fit(extracted_features_train)
+scaled_features_train = scaler.transform(extracted_features_train)
+
+```
+
 
 #### Training the classifier
 
@@ -545,13 +611,14 @@ heatmaps. This is done with the following aims:
 The `AggregatedHeatmap` class is reproduced entirely below: 
 
 ```python
-
-np.ones((8, 8))
-SMOOTHING_KERNEL = np.array([[0.25, 0.25], [0.25, 0.25]])
+SMOOTHING_KERNEL = np.ones((8, 8))
+SMOOTHING_KERNEL[2:-2, 2:-2] = 2
+SMOOTHING_KERNEL[3:-3, 3:-3] = 4
+SMOOTHING_KERNEL = SMOOTHING_KERNEL / np.sum(SMOOTHING_KERNEL)
 
 class AggregatedHeatmap:
     def __init__(self):
-        self.smoothed_heatmaps = np.zeros((5, 720, 1280))
+        self.smoothed_heatmaps = np.zeros((7, 720, 1280))
 
     def process_new_heatmap(self, heatmap):
         self.smoothed_heatmaps = np.roll(self.smoothed_heatmaps, 1, 0)
@@ -563,7 +630,8 @@ class AggregatedHeatmap:
         return cv2.filter2D(heatmap, -1, SMOOTHING_KERNEL)
 
     def smoothed_heatmap(self):
-        return np.average(self.smoothed_heatmaps, 0, [30, 28, 14, 10, 8])
+        return np.average(self.smoothed_heatmaps, 0, [50, 40, 30, 20, 20, 10, 10])  \
+               * np.count_nonzero(self.smoothed_heatmaps, 0)
 ```
 
 And the part where it is used is in the heatmap processing (`mask/heatmap.py`): 
@@ -609,15 +677,7 @@ The orchestration of processing the individual frames and saving them into a new
  
  I uploaded the result video to YouTube. It is embedded below if you are reading a rendered version of this writeup. 
  
- 
-[My output video](https://img.youtube.com/vi/YOUTUBE_VIDEO_ID_HERE/0.jpg)](https://www.youtube.com/watch?v=YOUTUBE_VIDEO_ID_HERE) 
-
-
-With the computationan demands of the heatmap aggregation step, the processing time of the video on my lapstop 
-
-
-TODO: maybe  upload the video to YouTube and include a (image) link to the video in the writeup, as 
-per https://stackoverflow.com/a/16079387
+[![My output video](https://img.youtube.com/vi/wW3-68DhNfI/0.jpg)](https://www.youtube.com/watch?v=wW3-68DhNfI) 
 
 ### Discussion
 
