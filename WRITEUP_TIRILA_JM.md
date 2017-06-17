@@ -64,7 +64,6 @@ below actually participate in processing the video.
 │   │   └── read_classification_training_data.py
 │   ├── traverse_image 
 │   │   ├── __init__.py
-│   │   ├── bin_spatial.py
 │   │   ├── find_cars.py
 ├── images
 │   ├── vehicles 
