@@ -371,6 +371,8 @@ color histogram features in the final submission_. This is at least in part due 
 the relatively great amount of time spent calculating the histograms, according to a cProfile run
 I performed to find out what was taking so long in my algorithm. 
 
+The spatial features were used with size parameter `(32, 32)`.
+
 Anyhow, the color histogram feature vector used in this project is computed using the following code. 
 
 ```python
