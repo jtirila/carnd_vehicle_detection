@@ -137,6 +137,6 @@ def search_for_cars(raw_image, classifier, scaler, aggregated_heatmp, scales=_DE
 if __name__ == "__main__":
     # detect_vehicles(previous_classifier_path=None, output_path="trans.mp4")
     # detect_vehicles(previous_classifier_path=_DEFAULT_CLASSIFIER_PATH, output_path="trans.mp4")
-    # detect_vehicles(previous_classifier_path=_DEFAULT_CLASSIFIER_PATH)
-    detect_vehicles(previous_classifier_path=None)
+    detect_vehicles(previous_classifier_path=_DEFAULT_CLASSIFIER_PATH)
+    # detect_vehicles(previous_classifier_path=None)
 

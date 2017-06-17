@@ -50,15 +50,8 @@ def get_classifier(classifier_path=None, classifier_save_path=DEFAULT_CLASSIFIER
         stacked_train = np.hstack(features_train)
         stacked_valid = np.hstack(features_valid)
         img_width = 64
-        print("About to stack and normalize")
         stacked_normalized_train = normalize_luminosity(stacked_train)
         stacked_normalized_valid = normalize_luminosity(stacked_valid)
-        print("Finished stacking and normalizing")
-        print(stacked_normalized_train.shape)
-        for start in range(len(features_train)):
-            msg = "Start: {}, end: {}".format(img_width * start, img_width * (start + 1))
-        print(msg)
-
 
         features_train = [stacked_normalized_train[:, img_width * start:img_width * (start + 1), :] for
                           start in range(len(features_train))]
