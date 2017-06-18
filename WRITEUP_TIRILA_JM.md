@@ -689,7 +689,7 @@ The orchestration of processing the individual frames and saving them into a new
  
  #### The result
  
- I uploaded the result video to YouTube. It is embedded below if you are reading a rendered version of this writeup. 
+I uploaded the result video to YouTube, follow the link below to check it out.  
  
 [![My output video](https://img.youtube.com/vi/LxIprfyKHZU/0.jpg)](https://www.youtube.com/watch?v=LxIprfyKHZU) 
 
