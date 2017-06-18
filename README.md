@@ -27,6 +27,6 @@ Udacity people, look this way please. My written report can be found by followin
 
 For the impatient, here is a link to the vido on YouTube: 
 
-[![The video I submitted for the project](https://img.youtube.com/vi/wW3-68DhNfI/0.jpg)](https://www.youtube.com/watch?v=wW3-68DhNfI) 
+[!The video I (re-) submitted for the project](https://img.youtube.com/vi/LxIprfyKHZU/0.jpg)](https://www.youtube.com/watch?v=LxIprfyKHZU) 
 
 
