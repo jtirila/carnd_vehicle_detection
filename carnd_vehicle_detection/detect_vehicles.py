@@ -40,6 +40,7 @@ DEFAULT_EXTRACT_PARAMS = {
 
 _DEFAULT_Y_STARTS_STOPS_PER_SCALE = {
     0.5: [400, 600],
+    0.7: [400, 500],
     1: [400, 600],
     1.4: [400, 670],
     1.5: [400, 670],
@@ -51,6 +52,7 @@ _DEFAULT_Y_STARTS_STOPS_PER_SCALE = {
 
 _DEFAULT_X_STARTS_STOPS_PER_SCALE = {
     0.5: [300, 980],
+    0.7: [300, 1080],
     1: [150, 1180],
     1.4: [150, None],
     1.5: [150, None],
@@ -60,7 +62,7 @@ _DEFAULT_X_STARTS_STOPS_PER_SCALE = {
     2.5: [150, None],
     3: [150, None]}
 
-_DEFAULT_SCALES = (1, 1.5, 1.7, 2)
+_DEFAULT_SCALES = (0.7, 1, 1.4, 1.5, 1.7, 2, 2.2)
 
 
 def detect_vehicles(input_video_path=DEFAULT_INPUT_VIDEO_PATH, output_path=_DEFAULT_VIDEO_OUTPUT_PATH,
