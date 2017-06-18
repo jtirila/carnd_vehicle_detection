@@ -46,7 +46,10 @@ def get_classifier(classifier_path=None, classifier_save_path=DEFAULT_CLASSIFIER
     else:
         if None in (features_train, labels_train, features_valid, labels_valid):
             features_train, features_valid, labels_train, labels_valid = read_training_data()
-        examples_raw = features_train[:20]
+
+        # Was used for documentation + debugging purposes
+        # examples_raw = features_train[:20]
+
         stacked_train = np.hstack(features_train)
         stacked_valid = np.hstack(features_valid)
         img_width = 64
@@ -57,15 +60,18 @@ def get_classifier(classifier_path=None, classifier_save_path=DEFAULT_CLASSIFIER
                           start in range(len(features_train))]
         features_valid = [stacked_normalized_valid[:, img_width * start:img_width * (start + 1), :]
                           for start in range(len(features_valid))]
-        examples = features_train[:20]
-        for img_raw, img_preprocessed in zip(examples_raw, examples):
-            plt.subplot(1, 3, 1)
-            plt.imshow(img_raw)
-            plt.subplot(1, 3, 2)
-            plt.imshow(normalize_luminosity(img_raw))
-            plt.subplot(1, 3, 3)
-            plt.imshow(img_preprocessed)
-            plt.show()
+
+        # The images were displayed for documentation and debugging purposes
+        # examples = features_train[:20]
+        # for img_raw, img_preprocessed in zip(examples_raw, examples):
+        #     plt.subplot(1, 3, 1)
+        #     plt.imshow(img_raw)
+        #     plt.subplot(1, 3, 2)
+        #     plt.imshow(normalize_luminosity(img_raw))
+        #     plt.subplot(1, 3, 3)
+        #     plt.imshow(img_preprocessed)
+        #     plt.show()
+
         extracted_features_train = [single_img_features(img, **extract_features_dict)
                                     for img in features_train]
         extracted_features_valid = [single_img_features(img, **extract_features_dict)

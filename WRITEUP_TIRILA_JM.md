@@ -228,6 +228,21 @@ To be specific, before equalizing the `Y` channel histogram, I concatenated **al
 large horizontal picture, and then after the normalization, sliced this huge image back into individual training
 images. 
 
+Here is the code for this batch normalization: 
+
+```python
+stacked_train = np.hstack(features_train)
+stacked_valid = np.hstack(features_valid)
+img_width = 64
+stacked_normalized_train = normalize_luminosity(stacked_train)
+stacked_normalized_valid = normalize_luminosity(stacked_valid)
+
+features_train = [stacked_normalized_train[:, img_width * start:img_width * (start + 1), :] for
+                  start in range(len(features_train))]
+features_valid = [stacked_normalized_valid[:, img_width * start:img_width * (start + 1), :]
+                  for start in range(len(features_valid))]
+```
+
 To demonstrate the effect, here are a few triplets with the original training image on the left, single-image 
 `Y` channel histogram normalized image in the middle, and the batch normalized image on the right. In all of 
 these images, the batch preprocessed image arguably outperforms the per-image preprocessed version, 

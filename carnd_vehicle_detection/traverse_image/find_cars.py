@@ -7,17 +7,20 @@ from carnd_vehicle_detection import ROOT_DIR
 import os
 from carnd_vehicle_detection.preprocess import normalize_luminosity, convert_color, bin_spatial, color_hist, get_hog_features
 
-COUNTER = 0
+# Was a debugging tool
+# COUNTER = 0
+
 
 def find_cars(img, ystart, ystop, xstart, xstop, scale, svc, X_scaler, color_space="RGB", hog_channel="ALL",
               orient=9, pix_per_cell=8, cell_per_block=2, spatial_size=(32, 32), hist_bins=32,
               hog_feat=True, hist_feat=True, spatial_feat=True):
     draw_img = np.copy(img)
-    # draw_img = draw_img.astype(np.float32) / 255
-    global COUNTER
-    COUNTER += 1
 
+    # Was used for debugging (displaying images of certain phases of the video
+    # global COUNTER
+    # COUNTER += 1
     # print("COUNTER: {}, scale: {}, color_space: {}".format(COUNTER, scale, color_space))
+
     ystart = 0 if ystart is None else ystart
     ystop = draw_img.shape[0] if ystop is None else ystop
     xstart = 0 if xstart is None else xstart
@@ -32,11 +35,12 @@ def find_cars(img, ystart, ystop, xstart, xstop, scale, svc, X_scaler, color_spa
         orig_resized = cv2.resize(orig_resized, (np.int(imshape[1] / scale), np.int(imshape[0] / scale)))
 
 
-    t, f = True, False
-    if f:
-        plt.imshow(orig_resized)
-        plt.title("Original image at scale {}".format(scale))
-        plt.show()
+    # For debugging & documentation
+    # t, f = True, False
+    # if f:
+    #     plt.imshow(orig_resized)
+    #     plt.title("Original image at scale {}".format(scale))
+    #     plt.show()
 
     ch1 = ctrans_tosearch[:, :, 0]
     ch2 = ctrans_tosearch[:, :, 1]
@@ -103,8 +107,9 @@ def find_cars(img, ystart, ystop, xstart, xstop, scale, svc, X_scaler, color_spa
             raw_features = np.hstack(img_features).reshape(1, -1)
             test_features = X_scaler.transform(raw_features)
             test_prediction = svc.predict(test_features)
-            if COUNTER == 1:
-                pass
+
+            # Debugging & documentation pic displays
+            # if COUNTER == 1:
                 # plt.imshow(subimg_orig)
                 # plt.title("Original image, pred result: {}, scale: {}".format(test_prediction, scale))
                 # plt.show()
